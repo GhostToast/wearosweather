@@ -1,0 +1,1671 @@
+Content-Type: text/plain; charset="UTF-8"
+
+<TaskerData sr="" dvi="1" tv="6.0.10">
+<Task sr="task4">
+<cdate>1582995500693</cdate>
+<edate>1680897525840</edate>
+<id>4</id>
+<nme>DarkSky</nme>
+<pri>100</pri>
+<rty>1</rty>
+<Action sr="act0" ve="7">
+<code>339</code>
+<se>false</se>
+<Bundle sr="arg0">
+<Vals sr="val">
+<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray
+sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%http_cookies
+Cookies
+The cookies the server sent in the response in the Cookie:COOKIE_VALUE
+format. You can use this directly in the 'Headers' field of the HTTP
+Request
+action&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%http_file_output
+File Output
+Will always contain the file's full path even if you specified a directory
+as the File to
+save.&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES2&gt;%http_response_code
+Response Code
+The HTTP Code the server
+responded&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES2&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES3&gt;%http_headers()
+Response Headers
+The HTTP Headers the server sent in the response. Each header is in the
+'key:value'
+format&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES3&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES4&gt;%http_response_length
+Response Length
+The size of the response in
+bytes&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES4&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+</Vals>
+</Bundle>
+<Int sr="arg1" val="0"/>
+<Int sr="arg10" val="0"/>
+<Int sr="arg11" val="0"/>
+<Int sr="arg12" val="0"/>
+<Str sr="arg2" ve="3">
+https://api.darksky.net/forecast/3934d067bce30ce05d95296c964dff58/%LOC?exclude=minutely,flags
+</Str>
+<Str sr="arg3" ve="3">Content-Type:application/json</Str>
+<Str sr="arg4" ve="3"/>
+<Str sr="arg5" ve="3"/>
+<Str sr="arg6" ve="3"/>
+<Str sr="arg7" ve="3">darksky_weather.txt</Str>
+<Int sr="arg8" val="30"/>
+<Int sr="arg9" val="0"/>
+</Action>
+<Action sr="act1" ve="7">
+<code>129</code>
+<Str sr="arg0" ve="3">var response = readFile(http_file_output);
+response = response.replace('&amp;&amp;','').replace('\n','');
+setGlobal("JsonStringData", response);
+
+response = JSON.parse(response);
+var day = response.daily.data[0];
+var now = response.currently;
+var hour = response.hourly.data[0];
+var next = response.hourly.data[2];
+var next2 = response.hourly.data[4];
+var next3 = response.hourly.data[6];
+var alerts = !! response.alerts;
+
+setGlobal("WeatherAlert", alerts);
+
+// Moon
+var moonPhase = Math.floor(day.moonPhase*16);
+setGlobal("MoonPhase", moonPhase);
+
+// Summary
+setGlobal("WeatherSummary", now.summary);
+
+// Icons
+setGlobal("WeatherIcon", now.icon);
+setGlobal("WeatherIconNext", next.icon);
+setGlobal("WeatherIconNext2", next2.icon);
+setGlobal("WeatherIconNext3", next3.icon);
+
+// Precipitation
+setGlobal("Precipitation", Math.round(hour.precipProbability*100));
+
+// Humidity
+setGlobal("Humidity",
+Math.round(now.humidity*100));
+
+// Temperature
+setGlobal("Temperature", Math.round(now.apparentTemperature));
+setGlobal("NextTemperature", Math.round(next.apparentTemperature));
+setGlobal("NextTemperature2", Math.round(next2.apparentTemperature));
+setGlobal("NextTemperature3", Math.round(next3.apparentTemperature));
+setGlobal("MaxTemp", Math.round(day.apparentTemperatureMax));
+setGlobal("MinTemp", Math.round(day.apparentTemperatureMin));
+
+// Time
+var dateNow = new Date(now.time*1000);
+
+var nextTime = new Date(next.time*1000).getHours();
+if(0==nextTime){
+  nextTime = "12am";
+} else if (12==nextTime){
+  nextTime = "12pm";
+} else {
+  nextTime = nextTime &gt; 12 ? nextTime - 12 + "pm" : nextTime + "am";
+}
+
+var nextTime2 = new Date(next2.time*1000).getHours();
+if(0==nextTime2){
+  nextTime2 = "12am";
+} else if (12==nextTime2){
+  nextTime2 = "12pm";
+} else {
+  nextTime2 = nextTime2 &gt; 12 ? nextTime2 - 12 + "pm" : nextTime2 + "am";
+}
+
+var nextTime3 = new Date(next3.time*1000).getHours();
+if(0==nextTime3){
+  nextTime3 = "12am";
+} else if (12==nextTime3){
+  nextTime3 = "12pm";
+} else {
+  nextTime3 = nextTime3 &gt; 12 ? nextTime3 - 12 + "pm" : nextTime3 + "am";
+}
+
+setGlobal("TimeChecked", dateNow.getHours() + ":" + dateNow.getMinutes());
+
+setGlobal("NextTime", nextTime);
+
+setGlobal("NextTime2", nextTime2);
+
+setGlobal("NextTime3", nextTime3);
+
+// Nighttime
+var nightTime = now.time &gt; day.sunsetTime || now.time &lt;
+day.sunriseTime;
+setGlobal("NightTime", now.time &gt; day.sunsetTime || now.time &lt;
+day.sunriseTime);
+
+setGlobal("NightTimeNext", next.time &gt; day.sunsetTime || next.time &lt;
+day.sunriseTime);
+
+setGlobal("NightTimeNext2", next2.time &gt; day.sunsetTime || next2.time
+&lt; day.sunriseTime);
+
+setGlobal("NightTimeNext3", next3.time &gt; day.sunsetTime || next3.time
+&lt; day.sunriseTime);
+
+var dateSun = new Date(nightTime ? day.sunriseTime*1000 :
+day.sunsetTime*1000);
+var dateSunHours = dateSun.getHours();
+if(dateSunHours &gt; 12) {
+dateSunHours = dateSunHours - 12;
+}
+var sunMinutes = dateSun.getMinutes();
+if (sunMinutes &lt; 10) {
+sunMinutes = "0" + sunMinutes;
+}
+setGlobal("SunEventTime", dateSunHours  + ":" + sunMinutes);
+
+// Wind
+setGlobal("WindSpeed", Math.round(now.windSpeed));
+var bearing = 0;
+if (typeof now.windBearing !== 'undefined') {
+bearing = Math.round(now.windBearing);
+}
+setGlobal("WindBearing", bearing);</Str>
+<Str sr="arg1" ve="3"/>
+<Int sr="arg2" val="1"/>
+<Int sr="arg3" val="45"/>
+</Action>
+<Action sr="act10" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%WindSpeed</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%WindSpeed</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%WindSpeed mapped to
+[tskr_WindSpeed]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act11" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%WindBearing</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%WindBearing</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%WindBearing mapped to
+[tskr_WindBearing]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act12" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%WeatherIconNext</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%WeatherIconNext</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%WeatherIconNext mapped to
+[tskr_WeatherIconNext]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act13" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%WeatherIconNext2</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%WeatherIconNext2</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%WeatherIconNext2 mapped to
+[tskr_WeatherIconNext2]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act14" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%WeatherIconNext3</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%WeatherIconNext3</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%WeatherIconNext3 mapped to
+[tskr_WeatherIconNext3]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act15" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%NextTemperature2</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%NextTemperature2</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%NextTemperature2 mapped to
+[tskr_NextTemperature2]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act16" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%NextTemperature3</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%NextTemperature3</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%NextTemperature3 mapped to
+[tskr_NextTemperature3]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act17" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%NextTime</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%NextTime</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%NextTime mapped to
+[tskr_NextTime]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act18" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%NextTime2</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%NextTime2</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%NextTime2 mapped to
+[tskr_NextTime2]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act19" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%NextTime3</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%NextTime3</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%NextTime3 mapped to
+[tskr_NextTime3]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act2" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%MoonPhase</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%MoonPhase</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%MoonPhase mapped to
+[tskr_MoonPhase]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act20" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%NightTimeNext</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%NightTimeNext</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%NightTimeNext mapped to
+[tskr_NightTimeNext]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act21" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%NightTimeNext2</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%NightTimeNext2</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%NightTimeNext2 mapped to
+[tskr_NightTimeNext2]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act22" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%NightTimeNext3</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%NightTimeNext3</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%NightTimeNext3 mapped to
+[tskr_NightTimeNext3]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act23" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%SunEventTime</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%SunEventTime</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%SunEventTime mapped to
+[tskr_SunEventTime]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act24" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%WeatherAlert</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%WeatherAlert</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%WeatherAlert mapped to
+[tskr_WeatherAlert]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act3" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%WeatherSummary</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%WeatherSummary</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%WeatherSummary mapped to
+[tskr_WeatherSummary]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act4" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%WeatherIcon</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%WeatherIcon</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%WeatherIcon mapped to
+[tskr_WeatherIcon]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act5" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%Precipitation</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%Precipitation</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%Precipitation mapped to
+[tskr_Precipitation]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act6" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>33577</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%Humidity</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%Humidity</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%Humidity mapped to
+[tskr_Humidity]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act7" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%Temperature</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%Temperature</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%Temperature mapped to
+[tskr_Temperature]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act8" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%NextTemperature</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%NextTemperature</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%NextTemperature mapped to
+[tskr_NextTemperature]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+<Action sr="act9" ve="7">
+<code>2065917220</code>
+<Bundle sr="arg0">
+<Vals sr="val">
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE>3516</com.pujie.wristwear.pujieblack.INT_VERSION_CODE>
+<com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>java.lang.Integer</com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>%NightTime</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>%NightTime</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE>
+<com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>java.lang.String</com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type>
+<com.twofortyfouram.locale.intent.extra.BLURB>%NightTime mapped to
+[tskr_NightTime]</com.twofortyfouram.locale.intent.extra.BLURB>
+<com.twofortyfouram.locale.intent.extra.BLURB-type>java.lang.String</com.twofortyfouram.locale.intent.extra.BLURB-type>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS>
+<net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>java.lang.String</net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type>
+<net.dinglisch.android.tasker.subbundled>true</net.dinglisch.android.tasker.subbundled>
+<net.dinglisch.android.tasker.subbundled-type>java.lang.Boolean</net.dinglisch.android.tasker.subbundled-type>
+</Vals>
+</Bundle>
+<Str sr="arg1" ve="3">com.pujie.wristwear.pujieblack</Str>
+<Str sr="arg2"
+ve="3">com.pujie.wristwear.pujieblack.tasker.EditVariableActivity</Str>
+<Int sr="arg3" val="0"/>
+<Int sr="arg4" val="0"/>
+</Action>
+</Task>
+</TaskerData>
+
+--000000000000190ea005f8c47761
+Content-Type: text/html; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+
+<div dir=3D"auto">&lt;TaskerData sr=3D&quot;&quot; dvi=3D&quot;1&quot; tv=
+=3D&quot;6.0.10&quot;&gt;<br>=09&lt;Task sr=3D&quot;task4&quot;&gt;<br>=09=
+=09&lt;cdate&gt;1582995500693&lt;/cdate&gt;<br>=09=09&lt;edate&gt;168089752=
+5840&lt;/edate&gt;<br>=09=09&lt;id&gt;4&lt;/id&gt;<br>=09=09&lt;nme&gt;Dark=
+Sky&lt;/nme&gt;<br>=09=09&lt;pri&gt;100&lt;/pri&gt;<br>=09=09&lt;rty&gt;1&l=
+t;/rty&gt;<br>=09=09&lt;Action sr=3D&quot;act0&quot; ve=3D&quot;7&quot;&gt;=
+<br>=09=09=09&lt;code&gt;339&lt;/code&gt;<br>=09=09=09&lt;se&gt;false&lt;/s=
+e&gt;<br>=09=09=09&lt;Bundle sr=3D&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;V=
+als sr=3D&quot;val&quot;&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.ta=
+sker.RELEVANT_VARIABLES&gt;&amp;lt;StringArray sr=3D&quot;&quot;&amp;gt;&am=
+p;lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&amp;gt;%http_c=
+ookies<br>Cookies<br>The cookies the server sent in the response in the Coo=
+kie:COOKIE_VALUE format. You can use this directly in the &#39;Headers&#39;=
+ field of the HTTP Request action&amp;lt;/_array_net.dinglisch.android.task=
+er.RELEVANT_VARIABLES0&amp;gt;&amp;lt;_array_net.dinglisch.android.tasker.R=
+ELEVANT_VARIABLES1&amp;gt;%http_file_output<br>File Output<br>Will always c=
+ontain the file&#39;s full path even if you specified a directory as the Fi=
+le to save.&amp;lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1=
+&amp;gt;&amp;lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES2&amp=
+;gt;%http_response_code<br>Response Code<br>The HTTP Code the server respon=
+ded&amp;lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES2&amp;gt;=
+&amp;lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES3&amp;gt;%htt=
+p_headers()<br>Response Headers<br>The HTTP Headers the server sent in the =
+response. Each header is in the &#39;key:value&#39; format&amp;lt;/_array_n=
+et.dinglisch.android.tasker.RELEVANT_VARIABLES3&amp;gt;&amp;lt;_array_net.d=
+inglisch.android.tasker.RELEVANT_VARIABLES4&amp;gt;%http_response_length<br=
+>Response Length<br>The size of the response in bytes&amp;lt;/_array_net.di=
+nglisch.android.tasker.RELEVANT_VARIABLES4&amp;gt;&amp;lt;/StringArray&amp;=
+gt;&lt;/net.dinglisch.android.tasker.RELEVANT_VARIABLES&gt;<br>=09=09=09=09=
+=09&lt;net.dinglisch.android.tasker.RELEVANT_VARIABLES-type&gt;[Ljava.lang.=
+String;&lt;/net.dinglisch.android.tasker.RELEVANT_VARIABLES-type&gt;<br>=09=
+=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt;/Bundle&gt;<br>=09=09=09&lt;Int sr=
+=3D&quot;arg1&quot; val=3D&quot;0&quot;/&gt;<br>=09=09=09&lt;Int sr=3D&quot=
+;arg10&quot; val=3D&quot;0&quot;/&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg11&=
+quot; val=3D&quot;0&quot;/&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg12&quot; v=
+al=3D&quot;0&quot;/&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg2&quot; ve=3D&quo=
+t;3&quot;&gt;<a href=3D"https://api.darksky.net/forecast/3934d067bce30ce05d=
+95296c964dff58/%LOC?exclude=3Dminutely,flags">https://api.darksky.net/forec=
+ast/3934d067bce30ce05d95296c964dff58/%LOC?exclude=3Dminutely,flags</a>&lt;/=
+Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg3&quot; ve=3D&quot;3&quot;&gt;Con=
+tent-Type:application/json&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg4&=
+quot; ve=3D&quot;3&quot;/&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg5&quot; ve=
+=3D&quot;3&quot;/&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg6&quot; ve=3D&quot;=
+3&quot;/&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg7&quot; ve=3D&quot;3&quot;&g=
+t;darksky_weather.txt&lt;/Str&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg8&quot;=
+ val=3D&quot;30&quot;/&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg9&quot; val=3D=
+&quot;0&quot;/&gt;<br>=09=09&lt;/Action&gt;<br>=09=09&lt;Action sr=3D&quot;=
+act1&quot; ve=3D&quot;7&quot;&gt;<br>=09=09=09&lt;code&gt;129&lt;/code&gt;<=
+br>=09=09=09&lt;Str sr=3D&quot;arg0&quot; ve=3D&quot;3&quot;&gt;var respons=
+e =3D readFile(http_file_output);<br>response =3D response.replace(&#39;&am=
+p;amp;&amp;amp;&#39;,&#39;&#39;).replace(&#39;\n&#39;,&#39;&#39;);<br>setGl=
+obal(&quot;JsonStringData&quot;, response);<br><br>response =3D JSON.parse(=
+response);<br>var day =3D response.daily.data[0];<br>var now =3D response.c=
+urrently;<br>var hour =3D response.hourly.data[0];<br>var next =3D response=
+.hourly.data[2];<br>var next2 =3D response.hourly.data[4];<br>var next3 =3D=
+ response.hourly.data[6];<br>var alerts =3D !! response.alerts;<br><br>setG=
+lobal(&quot;WeatherAlert&quot;, alerts);<br><br>// Moon<br>var moonPhase =
+=3D Math.floor(day.moonPhase*16);<br>setGlobal(&quot;MoonPhase&quot;, moonP=
+hase);<br><br>// Summary<br>setGlobal(&quot;WeatherSummary&quot;, now.summa=
+ry);<br><br>// Icons<br>setGlobal(&quot;WeatherIcon&quot;, now.icon);<br>se=
+tGlobal(&quot;WeatherIconNext&quot;, next.icon);<br>setGlobal(&quot;Weather=
+IconNext2&quot;, next2.icon);<br>setGlobal(&quot;WeatherIconNext3&quot;, ne=
+xt3.icon);<br><br>// Precipitation<br>setGlobal(&quot;Precipitation&quot;, =
+Math.round(hour.precipProbability*100));<br><br>// Humidity<br>setGlobal(&q=
+uot;Humidity&quot;,<br>Math.round(now.humidity*100));<br><br>// Temperature=
+<br>setGlobal(&quot;Temperature&quot;, Math.round(now.apparentTemperature))=
+;<br>setGlobal(&quot;NextTemperature&quot;, Math.round(next.apparentTempera=
+ture));<br>setGlobal(&quot;NextTemperature2&quot;, Math.round(next2.apparen=
+tTemperature));<br>setGlobal(&quot;NextTemperature3&quot;, Math.round(next3=
+.apparentTemperature));<br>setGlobal(&quot;MaxTemp&quot;, Math.round(day.ap=
+parentTemperatureMax));<br>setGlobal(&quot;MinTemp&quot;, Math.round(day.ap=
+parentTemperatureMin));<br><br>// Time<br>var dateNow =3D new Date(now.time=
+*1000);<br><br>var nextTime =3D new Date(next.time*1000).getHours();<br>if(=
+0=3D=3DnextTime){<br>=C2=A0 nextTime =3D &quot;12am&quot;;<br>} else if (12=
+=3D=3DnextTime){<br>=C2=A0 nextTime =3D &quot;12pm&quot;;<br>} else {<br>=
+=C2=A0 nextTime =3D nextTime &amp;gt; 12 ? nextTime - 12 + &quot;pm&quot; :=
+ nextTime + &quot;am&quot;;<br>}<br><br>var nextTime2 =3D new Date(next2.ti=
+me*1000).getHours();<br>if(0=3D=3DnextTime2){<br>=C2=A0 nextTime2 =3D &quot=
+;12am&quot;;<br>} else if (12=3D=3DnextTime2){<br>=C2=A0 nextTime2 =3D &quo=
+t;12pm&quot;;<br>} else {<br>=C2=A0 nextTime2 =3D nextTime2 &amp;gt; 12 ? n=
+extTime2 - 12 + &quot;pm&quot; : nextTime2 + &quot;am&quot;;<br>}<br><br>va=
+r nextTime3 =3D new Date(next3.time*1000).getHours();<br>if(0=3D=3DnextTime=
+3){<br>=C2=A0 nextTime3 =3D &quot;12am&quot;;<br>} else if (12=3D=3DnextTim=
+e3){<br>=C2=A0 nextTime3 =3D &quot;12pm&quot;;<br>} else {<br>=C2=A0 nextTi=
+me3 =3D nextTime3 &amp;gt; 12 ? nextTime3 - 12 + &quot;pm&quot; : nextTime3=
+ + &quot;am&quot;;<br>}<br><br>setGlobal(&quot;TimeChecked&quot;, dateNow.g=
+etHours() + &quot;:&quot; + dateNow.getMinutes());<br><br>setGlobal(&quot;N=
+extTime&quot;, nextTime);<br><br>setGlobal(&quot;NextTime2&quot;, nextTime2=
+);<br><br>setGlobal(&quot;NextTime3&quot;, nextTime3);<br><br>// Nighttime<=
+br>var nightTime =3D now.time &amp;gt; day.sunsetTime || now.time &amp;lt; =
+day.sunriseTime;<br>setGlobal(&quot;NightTime&quot;, now.time &amp;gt; day.=
+sunsetTime || now.time &amp;lt; day.sunriseTime);<br><br>setGlobal(&quot;Ni=
+ghtTimeNext&quot;, next.time &amp;gt; day.sunsetTime || next.time &amp;lt; =
+day.sunriseTime);<br><br>setGlobal(&quot;NightTimeNext2&quot;, next2.time &=
+amp;gt; day.sunsetTime || next2.time &amp;lt; day.sunriseTime);<br><br>setG=
+lobal(&quot;NightTimeNext3&quot;, next3.time &amp;gt; day.sunsetTime || nex=
+t3.time &amp;lt; day.sunriseTime);<br><br>var dateSun =3D new Date(nightTim=
+e ? day.sunriseTime*1000 : day.sunsetTime*1000);<br>var dateSunHours =3D da=
+teSun.getHours();<br>if(dateSunHours &amp;gt; 12) {<br>dateSunHours =3D dat=
+eSunHours - 12;<br>}<br>var sunMinutes =3D dateSun.getMinutes();<br>if (sun=
+Minutes &amp;lt; 10) {<br>sunMinutes =3D &quot;0&quot; + sunMinutes;<br>}<b=
+r>setGlobal(&quot;SunEventTime&quot;, dateSunHours=C2=A0 + &quot;:&quot; + =
+sunMinutes);<br><br>// Wind<br>setGlobal(&quot;WindSpeed&quot;, Math.round(=
+now.windSpeed));<br>var bearing =3D 0;<br>if (typeof now.windBearing !=3D=
+=3D &#39;undefined&#39;) {<br>bearing =3D Math.round(now.windBearing);<br>}=
+<br>setGlobal(&quot;WindBearing&quot;, bearing);&lt;/Str&gt;<br>=09=09=09&l=
+t;Str sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;/&gt;<br>=09=09=09&lt;Int sr=
+=3D&quot;arg2&quot; val=3D&quot;1&quot;/&gt;<br>=09=09=09&lt;Int sr=3D&quot=
+;arg3&quot; val=3D&quot;45&quot;/&gt;<br>=09=09&lt;/Action&gt;<br>=09=09&lt=
+;Action sr=3D&quot;act10&quot; ve=3D&quot;7&quot;&gt;<br>=09=09=09&lt;code&=
+gt;2065917220&lt;/code&gt;<br>=09=09=09&lt;Bundle sr=3D&quot;arg0&quot;&gt;=
+<br>=09=09=09=09&lt;Vals sr=3D&quot;val&quot;&gt;<br>=09=09=09=09=09&lt;com=
+.pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;3516&lt;/com.pujie.wristwea=
+r.pujieblack.INT_VERSION_CODE&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear=
+.pujieblack.INT_VERSION_CODE-type&gt;java.lang.Integer&lt;/com.pujie.wristw=
+ear.pujieblack.INT_VERSION_CODE-type&gt;<br>=09=09=09=09=09&lt;com.pujie.wr=
+istwear.pujieblack.STRING_TASKER_VARIABLE_NAME&gt;%WindSpeed&lt;/com.pujie.=
+wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME&gt;<br>=09=09=09=09=09&lt;=
+com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;java.lan=
+g.String&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-typ=
+e&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VA=
+RIABLE_VALUE&gt;%WindSpeed&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER=
+_VARIABLE_VALUE&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.ST=
+RING_TASKER_VARIABLE_VALUE-type&gt;java.lang.String&lt;/com.pujie.wristwear=
+.pujieblack.STRING_TASKER_VARIABLE_VALUE-type&gt;<br>=09=09=09=09=09&lt;com=
+.twofortyfouram.locale.intent.extra.BLURB&gt;%WindSpeed mapped to [tskr_Win=
+dSpeed]&lt;/com.twofortyfouram.locale.intent.extra.BLURB&gt;<br>=09=09=09=
+=09=09&lt;com.twofortyfouram.locale.intent.extra.BLURB-type&gt;java.lang.St=
+ring&lt;/com.twofortyfouram.locale.intent.extra.BLURB-type&gt;<br>=09=09=09=
+=09=09&lt;net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;com.=
+pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&lt;/net.dinglisch.a=
+ndroid.tasker.extras.VARIABLE_REPLACE_KEYS&gt;<br>=09=09=09=09=09&lt;net.di=
+nglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;java.lang.Strin=
+g&lt;/net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;<br=
+>=09=09=09=09=09&lt;net.dinglisch.android.tasker.subbundled&gt;true&lt;/net=
+.dinglisch.android.tasker.subbundled&gt;<br>=09=09=09=09=09&lt;net.dinglisc=
+h.android.tasker.subbundled-type&gt;java.lang.Boolean&lt;/net.dinglisch.and=
+roid.tasker.subbundled-type&gt;<br>=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&l=
+t;/Bundle&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;&=
+gt;com.pujie.wristwear.pujieblack&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quo=
+t;arg2&quot; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack.tasker.Ed=
+itVariableActivity&lt;/Str&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg3&quot; va=
+l=3D&quot;0&quot;/&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quo=
+t;0&quot;/&gt;<br>=09=09&lt;/Action&gt;<br>=09=09&lt;Action sr=3D&quot;act1=
+1&quot; ve=3D&quot;7&quot;&gt;<br>=09=09=09&lt;code&gt;2065917220&lt;/code&=
+gt;<br>=09=09=09&lt;Bundle sr=3D&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Val=
+s sr=3D&quot;val&quot;&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieb=
+lack.INT_VERSION_CODE&gt;3516&lt;/com.pujie.wristwear.pujieblack.INT_VERSIO=
+N_CODE&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION=
+_CODE-type&gt;java.lang.Integer&lt;/com.pujie.wristwear.pujieblack.INT_VERS=
+ION_CODE-type&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRI=
+NG_TASKER_VARIABLE_NAME&gt;%WindBearing&lt;/com.pujie.wristwear.pujieblack.=
+STRING_TASKER_VARIABLE_NAME&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.p=
+ujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;java.lang.String&lt;/com.puji=
+e.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;<br>=09=09=09=09=
+=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;%Wind=
+Bearing&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;=
+<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABL=
+E_VALUE-type&gt;java.lang.String&lt;/com.pujie.wristwear.pujieblack.STRING_=
+TASKER_VARIABLE_VALUE-type&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.loc=
+ale.intent.extra.BLURB&gt;%WindBearing mapped to [tskr_WindBearing]&lt;/com=
+.twofortyfouram.locale.intent.extra.BLURB&gt;<br>=09=09=09=09=09&lt;com.two=
+fortyfouram.locale.intent.extra.BLURB-type&gt;java.lang.String&lt;/com.twof=
+ortyfouram.locale.intent.extra.BLURB-type&gt;<br>=09=09=09=09=09&lt;net.din=
+glisch.android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;com.pujie.wristwear.p=
+ujieblack.STRING_TASKER_VARIABLE_VALUE&lt;/net.dinglisch.android.tasker.ext=
+ras.VARIABLE_REPLACE_KEYS&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.t=
+asker.extras.VARIABLE_REPLACE_KEYS-type&gt;java.lang.String&lt;/net.dinglis=
+ch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;<br>=09=09=09=09=09&=
+lt;net.dinglisch.android.tasker.subbundled&gt;true&lt;/net.dinglisch.androi=
+d.tasker.subbundled&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.=
+subbundled-type&gt;java.lang.Boolean&lt;/net.dinglisch.android.tasker.subbu=
+ndled-type&gt;<br>=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt;/Bundle&gt;<br>=
+=09=09=09&lt;Str sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;&gt;com.pujie.wris=
+twear.pujieblack&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg2&quot; ve=
+=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack.tasker.EditVariableActiv=
+ity&lt;/Str&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg3&quot; val=3D&quot;0&quo=
+t;/&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quot;0&quot;/&gt;<=
+br>=09=09&lt;/Action&gt;<br>=09=09&lt;Action sr=3D&quot;act12&quot; ve=3D&q=
+uot;7&quot;&gt;<br>=09=09=09&lt;code&gt;2065917220&lt;/code&gt;<br>=09=09=
+=09&lt;Bundle sr=3D&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Vals sr=3D&quot;=
+val&quot;&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERS=
+ION_CODE&gt;3516&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;<br=
+>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type&gt=
+;java.lang.Integer&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type=
+&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VAR=
+IABLE_NAME&gt;%WeatherIconNext&lt;/com.pujie.wristwear.pujieblack.STRING_TA=
+SKER_VARIABLE_NAME&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack=
+.STRING_TASKER_VARIABLE_NAME-type&gt;java.lang.String&lt;/com.pujie.wristwe=
+ar.pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;<br>=09=09=09=09=09&lt;co=
+m.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;%WeatherIconNe=
+xt&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;<br>=
+=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VA=
+LUE-type&gt;java.lang.String&lt;/com.pujie.wristwear.pujieblack.STRING_TASK=
+ER_VARIABLE_VALUE-type&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.locale.=
+intent.extra.BLURB&gt;%WeatherIconNext mapped to [tskr_WeatherIconNext]&lt;=
+/com.twofortyfouram.locale.intent.extra.BLURB&gt;<br>=09=09=09=09=09&lt;com=
+.twofortyfouram.locale.intent.extra.BLURB-type&gt;java.lang.String&lt;/com.=
+twofortyfouram.locale.intent.extra.BLURB-type&gt;<br>=09=09=09=09=09&lt;net=
+.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;com.pujie.wristwe=
+ar.pujieblack.STRING_TASKER_VARIABLE_VALUE&lt;/net.dinglisch.android.tasker=
+.extras.VARIABLE_REPLACE_KEYS&gt;<br>=09=09=09=09=09&lt;net.dinglisch.andro=
+id.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;java.lang.String&lt;/net.din=
+glisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;<br>=09=09=09=09=
+=09&lt;net.dinglisch.android.tasker.subbundled&gt;true&lt;/net.dinglisch.an=
+droid.tasker.subbundled&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tas=
+ker.subbundled-type&gt;java.lang.Boolean&lt;/net.dinglisch.android.tasker.s=
+ubbundled-type&gt;<br>=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt;/Bundle&gt;=
+<br>=09=09=09&lt;Str sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;&gt;com.pujie.=
+wristwear.pujieblack&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg2&quot; =
+ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack.tasker.EditVariableAct=
+ivity&lt;/Str&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg3&quot; val=3D&quot;0&q=
+uot;/&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quot;0&quot;/&gt=
+;<br>=09=09&lt;/Action&gt;<br>=09=09&lt;Action sr=3D&quot;act13&quot; ve=3D=
+&quot;7&quot;&gt;<br>=09=09=09&lt;code&gt;2065917220&lt;/code&gt;<br>=09=09=
+=09&lt;Bundle sr=3D&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Vals sr=3D&quot;=
+val&quot;&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERS=
+ION_CODE&gt;3516&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;<br=
+>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type&gt=
+;java.lang.Integer&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type=
+&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VAR=
+IABLE_NAME&gt;%WeatherIconNext2&lt;/com.pujie.wristwear.pujieblack.STRING_T=
+ASKER_VARIABLE_NAME&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblac=
+k.STRING_TASKER_VARIABLE_NAME-type&gt;java.lang.String&lt;/com.pujie.wristw=
+ear.pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;<br>=09=09=09=09=09&lt;c=
+om.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;%WeatherIconN=
+ext2&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;<br=
+>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_V=
+ALUE-type&gt;java.lang.String&lt;/com.pujie.wristwear.pujieblack.STRING_TAS=
+KER_VARIABLE_VALUE-type&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.locale=
+.intent.extra.BLURB&gt;%WeatherIconNext2 mapped to [tskr_WeatherIconNext2]&=
+lt;/com.twofortyfouram.locale.intent.extra.BLURB&gt;<br>=09=09=09=09=09&lt;=
+com.twofortyfouram.locale.intent.extra.BLURB-type&gt;java.lang.String&lt;/c=
+om.twofortyfouram.locale.intent.extra.BLURB-type&gt;<br>=09=09=09=09=09&lt;=
+net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;com.pujie.wris=
+twear.pujieblack.STRING_TASKER_VARIABLE_VALUE&lt;/net.dinglisch.android.tas=
+ker.extras.VARIABLE_REPLACE_KEYS&gt;<br>=09=09=09=09=09&lt;net.dinglisch.an=
+droid.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;java.lang.String&lt;/net.=
+dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;<br>=09=09=09=
+=09=09&lt;net.dinglisch.android.tasker.subbundled&gt;true&lt;/net.dinglisch=
+.android.tasker.subbundled&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.=
+tasker.subbundled-type&gt;java.lang.Boolean&lt;/net.dinglisch.android.taske=
+r.subbundled-type&gt;<br>=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt;/Bundle&=
+gt;<br>=09=09=09&lt;Str sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;&gt;com.puj=
+ie.wristwear.pujieblack&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg2&quo=
+t; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack.tasker.EditVariable=
+Activity&lt;/Str&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg3&quot; val=3D&quot;=
+0&quot;/&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quot;0&quot;/=
+&gt;<br>=09=09&lt;/Action&gt;<br>=09=09&lt;Action sr=3D&quot;act14&quot; ve=
+=3D&quot;7&quot;&gt;<br>=09=09=09&lt;code&gt;2065917220&lt;/code&gt;<br>=09=
+=09=09&lt;Bundle sr=3D&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Vals sr=3D&qu=
+ot;val&quot;&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_V=
+ERSION_CODE&gt;3516&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;=
+<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type=
+&gt;java.lang.Integer&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE-t=
+ype&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_=
+VARIABLE_NAME&gt;%WeatherIconNext3&lt;/com.pujie.wristwear.pujieblack.STRIN=
+G_TASKER_VARIABLE_NAME&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieb=
+lack.STRING_TASKER_VARIABLE_NAME-type&gt;java.lang.String&lt;/com.pujie.wri=
+stwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;<br>=09=09=09=09=09&l=
+t;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;%WeatherIc=
+onNext3&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;=
+<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABL=
+E_VALUE-type&gt;java.lang.String&lt;/com.pujie.wristwear.pujieblack.STRING_=
+TASKER_VARIABLE_VALUE-type&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.loc=
+ale.intent.extra.BLURB&gt;%WeatherIconNext3 mapped to [tskr_WeatherIconNext=
+3]&lt;/com.twofortyfouram.locale.intent.extra.BLURB&gt;<br>=09=09=09=09=09&=
+lt;com.twofortyfouram.locale.intent.extra.BLURB-type&gt;java.lang.String&lt=
+;/com.twofortyfouram.locale.intent.extra.BLURB-type&gt;<br>=09=09=09=09=09&=
+lt;net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;com.pujie.w=
+ristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&lt;/net.dinglisch.android.=
+tasker.extras.VARIABLE_REPLACE_KEYS&gt;<br>=09=09=09=09=09&lt;net.dinglisch=
+.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;java.lang.String&lt;/n=
+et.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;<br>=09=09=
+=09=09=09&lt;net.dinglisch.android.tasker.subbundled&gt;true&lt;/net.dingli=
+sch.android.tasker.subbundled&gt;<br>=09=09=09=09=09&lt;net.dinglisch.andro=
+id.tasker.subbundled-type&gt;java.lang.Boolean&lt;/net.dinglisch.android.ta=
+sker.subbundled-type&gt;<br>=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt;/Bund=
+le&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;&gt;com.=
+pujie.wristwear.pujieblack&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg2&=
+quot; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack.tasker.EditVaria=
+bleActivity&lt;/Str&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg3&quot; val=3D&qu=
+ot;0&quot;/&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quot;0&quo=
+t;/&gt;<br>=09=09&lt;/Action&gt;<br>=09=09&lt;Action sr=3D&quot;act15&quot;=
+ ve=3D&quot;7&quot;&gt;<br>=09=09=09&lt;code&gt;2065917220&lt;/code&gt;<br>=
+=09=09=09&lt;Bundle sr=3D&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Vals sr=3D=
+&quot;val&quot;&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.IN=
+T_VERSION_CODE&gt;3516&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE&=
+gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE-t=
+ype&gt;java.lang.Integer&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_COD=
+E-type&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASK=
+ER_VARIABLE_NAME&gt;%NextTemperature2&lt;/com.pujie.wristwear.pujieblack.ST=
+RING_TASKER_VARIABLE_NAME&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.puj=
+ieblack.STRING_TASKER_VARIABLE_NAME-type&gt;java.lang.String&lt;/com.pujie.=
+wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;<br>=09=09=09=09=
+=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;%Next=
+Temperature2&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALU=
+E&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VA=
+RIABLE_VALUE-type&gt;java.lang.String&lt;/com.pujie.wristwear.pujieblack.ST=
+RING_TASKER_VARIABLE_VALUE-type&gt;<br>=09=09=09=09=09&lt;com.twofortyfoura=
+m.locale.intent.extra.BLURB&gt;%NextTemperature2 mapped to [tskr_NextTemper=
+ature2]&lt;/com.twofortyfouram.locale.intent.extra.BLURB&gt;<br>=09=09=09=
+=09=09&lt;com.twofortyfouram.locale.intent.extra.BLURB-type&gt;java.lang.St=
+ring&lt;/com.twofortyfouram.locale.intent.extra.BLURB-type&gt;<br>=09=09=09=
+=09=09&lt;net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;com.=
+pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&lt;/net.dinglisch.a=
+ndroid.tasker.extras.VARIABLE_REPLACE_KEYS&gt;<br>=09=09=09=09=09&lt;net.di=
+nglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;java.lang.Strin=
+g&lt;/net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;<br=
+>=09=09=09=09=09&lt;net.dinglisch.android.tasker.subbundled&gt;true&lt;/net=
+.dinglisch.android.tasker.subbundled&gt;<br>=09=09=09=09=09&lt;net.dinglisc=
+h.android.tasker.subbundled-type&gt;java.lang.Boolean&lt;/net.dinglisch.and=
+roid.tasker.subbundled-type&gt;<br>=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&l=
+t;/Bundle&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;&=
+gt;com.pujie.wristwear.pujieblack&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quo=
+t;arg2&quot; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack.tasker.Ed=
+itVariableActivity&lt;/Str&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg3&quot; va=
+l=3D&quot;0&quot;/&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quo=
+t;0&quot;/&gt;<br>=09=09&lt;/Action&gt;<br>=09=09&lt;Action sr=3D&quot;act1=
+6&quot; ve=3D&quot;7&quot;&gt;<br>=09=09=09&lt;code&gt;2065917220&lt;/code&=
+gt;<br>=09=09=09&lt;Bundle sr=3D&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Val=
+s sr=3D&quot;val&quot;&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieb=
+lack.INT_VERSION_CODE&gt;3516&lt;/com.pujie.wristwear.pujieblack.INT_VERSIO=
+N_CODE&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION=
+_CODE-type&gt;java.lang.Integer&lt;/com.pujie.wristwear.pujieblack.INT_VERS=
+ION_CODE-type&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRI=
+NG_TASKER_VARIABLE_NAME&gt;%NextTemperature3&lt;/com.pujie.wristwear.pujieb=
+lack.STRING_TASKER_VARIABLE_NAME&gt;<br>=09=09=09=09=09&lt;com.pujie.wristw=
+ear.pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;java.lang.String&lt;/com=
+.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;<br>=09=09=
+=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt=
+;%NextTemperature3&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABL=
+E_VALUE&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TAS=
+KER_VARIABLE_VALUE-type&gt;java.lang.String&lt;/com.pujie.wristwear.pujiebl=
+ack.STRING_TASKER_VARIABLE_VALUE-type&gt;<br>=09=09=09=09=09&lt;com.twofort=
+yfouram.locale.intent.extra.BLURB&gt;%NextTemperature3 mapped to [tskr_Next=
+Temperature3]&lt;/com.twofortyfouram.locale.intent.extra.BLURB&gt;<br>=09=
+=09=09=09=09&lt;com.twofortyfouram.locale.intent.extra.BLURB-type&gt;java.l=
+ang.String&lt;/com.twofortyfouram.locale.intent.extra.BLURB-type&gt;<br>=09=
+=09=09=09=09&lt;net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS&g=
+t;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&lt;/net.dingl=
+isch.android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;<br>=09=09=09=09=09&lt;=
+net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;java.lang=
+.String&lt;/net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&=
+gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.subbundled&gt;true&l=
+t;/net.dinglisch.android.tasker.subbundled&gt;<br>=09=09=09=09=09&lt;net.di=
+nglisch.android.tasker.subbundled-type&gt;java.lang.Boolean&lt;/net.dinglis=
+ch.android.tasker.subbundled-type&gt;<br>=09=09=09=09&lt;/Vals&gt;<br>=09=
+=09=09&lt;/Bundle&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg1&quot; ve=3D&quot;=
+3&quot;&gt;com.pujie.wristwear.pujieblack&lt;/Str&gt;<br>=09=09=09&lt;Str s=
+r=3D&quot;arg2&quot; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack.t=
+asker.EditVariableActivity&lt;/Str&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg3&=
+quot; val=3D&quot;0&quot;/&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg4&quot; va=
+l=3D&quot;0&quot;/&gt;<br>=09=09&lt;/Action&gt;<br>=09=09&lt;Action sr=3D&q=
+uot;act17&quot; ve=3D&quot;7&quot;&gt;<br>=09=09=09&lt;code&gt;2065917220&l=
+t;/code&gt;<br>=09=09=09&lt;Bundle sr=3D&quot;arg0&quot;&gt;<br>=09=09=09=
+=09&lt;Vals sr=3D&quot;val&quot;&gt;<br>=09=09=09=09=09&lt;com.pujie.wristw=
+ear.pujieblack.INT_VERSION_CODE&gt;3516&lt;/com.pujie.wristwear.pujieblack.=
+INT_VERSION_CODE&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.I=
+NT_VERSION_CODE-type&gt;java.lang.Integer&lt;/com.pujie.wristwear.pujieblac=
+k.INT_VERSION_CODE-type&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujie=
+black.STRING_TASKER_VARIABLE_NAME&gt;%NextTime&lt;/com.pujie.wristwear.puji=
+eblack.STRING_TASKER_VARIABLE_NAME&gt;<br>=09=09=09=09=09&lt;com.pujie.wris=
+twear.pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;java.lang.String&lt;/c=
+om.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;<br>=09=
+=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE=
+&gt;%NextTime&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VAL=
+UE&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_V=
+ARIABLE_VALUE-type&gt;java.lang.String&lt;/com.pujie.wristwear.pujieblack.S=
+TRING_TASKER_VARIABLE_VALUE-type&gt;<br>=09=09=09=09=09&lt;com.twofortyfour=
+am.locale.intent.extra.BLURB&gt;%NextTime mapped to [tskr_NextTime]&lt;/com=
+.twofortyfouram.locale.intent.extra.BLURB&gt;<br>=09=09=09=09=09&lt;com.two=
+fortyfouram.locale.intent.extra.BLURB-type&gt;java.lang.String&lt;/com.twof=
+ortyfouram.locale.intent.extra.BLURB-type&gt;<br>=09=09=09=09=09&lt;net.din=
+glisch.android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;com.pujie.wristwear.p=
+ujieblack.STRING_TASKER_VARIABLE_VALUE&lt;/net.dinglisch.android.tasker.ext=
+ras.VARIABLE_REPLACE_KEYS&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.t=
+asker.extras.VARIABLE_REPLACE_KEYS-type&gt;java.lang.String&lt;/net.dinglis=
+ch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;<br>=09=09=09=09=09&=
+lt;net.dinglisch.android.tasker.subbundled&gt;true&lt;/net.dinglisch.androi=
+d.tasker.subbundled&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.=
+subbundled-type&gt;java.lang.Boolean&lt;/net.dinglisch.android.tasker.subbu=
+ndled-type&gt;<br>=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt;/Bundle&gt;<br>=
+=09=09=09&lt;Str sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;&gt;com.pujie.wris=
+twear.pujieblack&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg2&quot; ve=
+=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack.tasker.EditVariableActiv=
+ity&lt;/Str&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg3&quot; val=3D&quot;0&quo=
+t;/&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quot;0&quot;/&gt;<=
+br>=09=09&lt;/Action&gt;<br>=09=09&lt;Action sr=3D&quot;act18&quot; ve=3D&q=
+uot;7&quot;&gt;<br>=09=09=09&lt;code&gt;2065917220&lt;/code&gt;<br>=09=09=
+=09&lt;Bundle sr=3D&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Vals sr=3D&quot;=
+val&quot;&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERS=
+ION_CODE&gt;3516&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;<br=
+>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type&gt=
+;java.lang.Integer&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type=
+&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VAR=
+IABLE_NAME&gt;%NextTime2&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_V=
+ARIABLE_NAME&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRIN=
+G_TASKER_VARIABLE_NAME-type&gt;java.lang.String&lt;/com.pujie.wristwear.puj=
+ieblack.STRING_TASKER_VARIABLE_NAME-type&gt;<br>=09=09=09=09=09&lt;com.puji=
+e.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;%NextTime2&lt;/com.p=
+ujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;<br>=09=09=09=09=
+=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type&gt;=
+java.lang.String&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_=
+VALUE-type&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.locale.intent.extra=
+.BLURB&gt;%NextTime2 mapped to [tskr_NextTime2]&lt;/com.twofortyfouram.loca=
+le.intent.extra.BLURB&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.locale.i=
+ntent.extra.BLURB-type&gt;java.lang.String&lt;/com.twofortyfouram.locale.in=
+tent.extra.BLURB-type&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.taske=
+r.extras.VARIABLE_REPLACE_KEYS&gt;com.pujie.wristwear.pujieblack.STRING_TAS=
+KER_VARIABLE_VALUE&lt;/net.dinglisch.android.tasker.extras.VARIABLE_REPLACE=
+_KEYS&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.extras.VARIABL=
+E_REPLACE_KEYS-type&gt;java.lang.String&lt;/net.dinglisch.android.tasker.ex=
+tras.VARIABLE_REPLACE_KEYS-type&gt;<br>=09=09=09=09=09&lt;net.dinglisch.and=
+roid.tasker.subbundled&gt;true&lt;/net.dinglisch.android.tasker.subbundled&=
+gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.subbundled-type&gt;j=
+ava.lang.Boolean&lt;/net.dinglisch.android.tasker.subbundled-type&gt;<br>=
+=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt;/Bundle&gt;<br>=09=09=09&lt;Str s=
+r=3D&quot;arg1&quot; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack&l=
+t;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg2&quot; ve=3D&quot;3&quot;&gt;=
+com.pujie.wristwear.pujieblack.tasker.EditVariableActivity&lt;/Str&gt;<br>=
+=09=09=09&lt;Int sr=3D&quot;arg3&quot; val=3D&quot;0&quot;/&gt;<br>=09=09=
+=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quot;0&quot;/&gt;<br>=09=09&lt;/Act=
+ion&gt;<br>=09=09&lt;Action sr=3D&quot;act19&quot; ve=3D&quot;7&quot;&gt;<b=
+r>=09=09=09&lt;code&gt;2065917220&lt;/code&gt;<br>=09=09=09&lt;Bundle sr=3D=
+&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Vals sr=3D&quot;val&quot;&gt;<br>=
+=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;3516&=
+lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;<br>=09=09=09=09=09&=
+lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type&gt;java.lang.Intege=
+r&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type&gt;<br>=09=09=09=
+=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME&gt;%Ne=
+xtTime3&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME&gt;<=
+br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE=
+_NAME-type&gt;java.lang.String&lt;/com.pujie.wristwear.pujieblack.STRING_TA=
+SKER_VARIABLE_NAME-type&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujie=
+black.STRING_TASKER_VARIABLE_VALUE&gt;%NextTime3&lt;/com.pujie.wristwear.pu=
+jieblack.STRING_TASKER_VARIABLE_VALUE&gt;<br>=09=09=09=09=09&lt;com.pujie.w=
+ristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type&gt;java.lang.String&l=
+t;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type&gt;<br>=
+=09=09=09=09=09&lt;com.twofortyfouram.locale.intent.extra.BLURB&gt;%NextTim=
+e3 mapped to [tskr_NextTime3]&lt;/com.twofortyfouram.locale.intent.extra.BL=
+URB&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.locale.intent.extra.BLURB-=
+type&gt;java.lang.String&lt;/com.twofortyfouram.locale.intent.extra.BLURB-t=
+ype&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.extras.VARIABLE_=
+REPLACE_KEYS&gt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE=
+&lt;/net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;<br>=09=
+=09=09=09=09&lt;net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-t=
+ype&gt;java.lang.String&lt;/net.dinglisch.android.tasker.extras.VARIABLE_RE=
+PLACE_KEYS-type&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.subb=
+undled&gt;true&lt;/net.dinglisch.android.tasker.subbundled&gt;<br>=09=09=09=
+=09=09&lt;net.dinglisch.android.tasker.subbundled-type&gt;java.lang.Boolean=
+&lt;/net.dinglisch.android.tasker.subbundled-type&gt;<br>=09=09=09=09&lt;/V=
+als&gt;<br>=09=09=09&lt;/Bundle&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg1&quo=
+t; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack&lt;/Str&gt;<br>=09=
+=09=09&lt;Str sr=3D&quot;arg2&quot; ve=3D&quot;3&quot;&gt;com.pujie.wristwe=
+ar.pujieblack.tasker.EditVariableActivity&lt;/Str&gt;<br>=09=09=09&lt;Int s=
+r=3D&quot;arg3&quot; val=3D&quot;0&quot;/&gt;<br>=09=09=09&lt;Int sr=3D&quo=
+t;arg4&quot; val=3D&quot;0&quot;/&gt;<br>=09=09&lt;/Action&gt;<br>=09=09&lt=
+;Action sr=3D&quot;act2&quot; ve=3D&quot;7&quot;&gt;<br>=09=09=09&lt;code&g=
+t;2065917220&lt;/code&gt;<br>=09=09=09&lt;Bundle sr=3D&quot;arg0&quot;&gt;<=
+br>=09=09=09=09&lt;Vals sr=3D&quot;val&quot;&gt;<br>=09=09=09=09=09&lt;com.=
+pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;3516&lt;/com.pujie.wristwear=
+.pujieblack.INT_VERSION_CODE&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.=
+pujieblack.INT_VERSION_CODE-type&gt;java.lang.Integer&lt;/com.pujie.wristwe=
+ar.pujieblack.INT_VERSION_CODE-type&gt;<br>=09=09=09=09=09&lt;com.pujie.wri=
+stwear.pujieblack.STRING_TASKER_VARIABLE_NAME&gt;%MoonPhase&lt;/com.pujie.w=
+ristwear.pujieblack.STRING_TASKER_VARIABLE_NAME&gt;<br>=09=09=09=09=09&lt;c=
+om.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;java.lang=
+.String&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type=
+&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VAR=
+IABLE_VALUE&gt;%MoonPhase&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_=
+VARIABLE_VALUE&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STR=
+ING_TASKER_VARIABLE_VALUE-type&gt;java.lang.String&lt;/com.pujie.wristwear.=
+pujieblack.STRING_TASKER_VARIABLE_VALUE-type&gt;<br>=09=09=09=09=09&lt;com.=
+twofortyfouram.locale.intent.extra.BLURB&gt;%MoonPhase mapped to [tskr_Moon=
+Phase]&lt;/com.twofortyfouram.locale.intent.extra.BLURB&gt;<br>=09=09=09=09=
+=09&lt;com.twofortyfouram.locale.intent.extra.BLURB-type&gt;java.lang.Strin=
+g&lt;/com.twofortyfouram.locale.intent.extra.BLURB-type&gt;<br>=09=09=09=09=
+=09&lt;net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;com.puj=
+ie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&lt;/net.dinglisch.andr=
+oid.tasker.extras.VARIABLE_REPLACE_KEYS&gt;<br>=09=09=09=09=09&lt;net.dingl=
+isch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;java.lang.String&l=
+t;/net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;<br>=
+=09=09=09=09=09&lt;net.dinglisch.android.tasker.subbundled&gt;true&lt;/net.=
+dinglisch.android.tasker.subbundled&gt;<br>=09=09=09=09=09&lt;net.dinglisch=
+.android.tasker.subbundled-type&gt;java.lang.Boolean&lt;/net.dinglisch.andr=
+oid.tasker.subbundled-type&gt;<br>=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt=
+;/Bundle&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;&g=
+t;com.pujie.wristwear.pujieblack&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot=
+;arg2&quot; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack.tasker.Edi=
+tVariableActivity&lt;/Str&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg3&quot; val=
+=3D&quot;0&quot;/&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quot=
+;0&quot;/&gt;<br>=09=09&lt;/Action&gt;<br>=09=09&lt;Action sr=3D&quot;act20=
+&quot; ve=3D&quot;7&quot;&gt;<br>=09=09=09&lt;code&gt;2065917220&lt;/code&g=
+t;<br>=09=09=09&lt;Bundle sr=3D&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Vals=
+ sr=3D&quot;val&quot;&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujiebl=
+ack.INT_VERSION_CODE&gt;3516&lt;/com.pujie.wristwear.pujieblack.INT_VERSION=
+_CODE&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_=
+CODE-type&gt;java.lang.Integer&lt;/com.pujie.wristwear.pujieblack.INT_VERSI=
+ON_CODE-type&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRIN=
+G_TASKER_VARIABLE_NAME&gt;%NightTimeNext&lt;/com.pujie.wristwear.pujieblack=
+.STRING_TASKER_VARIABLE_NAME&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.=
+pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;java.lang.String&lt;/com.puj=
+ie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;<br>=09=09=09=
+=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;%N=
+ightTimeNext&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALU=
+E&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VA=
+RIABLE_VALUE-type&gt;java.lang.String&lt;/com.pujie.wristwear.pujieblack.ST=
+RING_TASKER_VARIABLE_VALUE-type&gt;<br>=09=09=09=09=09&lt;com.twofortyfoura=
+m.locale.intent.extra.BLURB&gt;%NightTimeNext mapped to [tskr_NightTimeNext=
+]&lt;/com.twofortyfouram.locale.intent.extra.BLURB&gt;<br>=09=09=09=09=09&l=
+t;com.twofortyfouram.locale.intent.extra.BLURB-type&gt;java.lang.String&lt;=
+/com.twofortyfouram.locale.intent.extra.BLURB-type&gt;<br>=09=09=09=09=09&l=
+t;net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;com.pujie.wr=
+istwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&lt;/net.dinglisch.android.t=
+asker.extras.VARIABLE_REPLACE_KEYS&gt;<br>=09=09=09=09=09&lt;net.dinglisch.=
+android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;java.lang.String&lt;/ne=
+t.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;<br>=09=09=
+=09=09=09&lt;net.dinglisch.android.tasker.subbundled&gt;true&lt;/net.dingli=
+sch.android.tasker.subbundled&gt;<br>=09=09=09=09=09&lt;net.dinglisch.andro=
+id.tasker.subbundled-type&gt;java.lang.Boolean&lt;/net.dinglisch.android.ta=
+sker.subbundled-type&gt;<br>=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt;/Bund=
+le&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;&gt;com.=
+pujie.wristwear.pujieblack&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg2&=
+quot; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack.tasker.EditVaria=
+bleActivity&lt;/Str&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg3&quot; val=3D&qu=
+ot;0&quot;/&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quot;0&quo=
+t;/&gt;<br>=09=09&lt;/Action&gt;<br>=09=09&lt;Action sr=3D&quot;act21&quot;=
+ ve=3D&quot;7&quot;&gt;<br>=09=09=09&lt;code&gt;2065917220&lt;/code&gt;<br>=
+=09=09=09&lt;Bundle sr=3D&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Vals sr=3D=
+&quot;val&quot;&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.IN=
+T_VERSION_CODE&gt;3516&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE&=
+gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE-t=
+ype&gt;java.lang.Integer&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_COD=
+E-type&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASK=
+ER_VARIABLE_NAME&gt;%NightTimeNext2&lt;/com.pujie.wristwear.pujieblack.STRI=
+NG_TASKER_VARIABLE_NAME&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujie=
+black.STRING_TASKER_VARIABLE_NAME-type&gt;java.lang.String&lt;/com.pujie.wr=
+istwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;<br>=09=09=09=09=09&=
+lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;%NightTim=
+eNext2&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;<=
+br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE=
+_VALUE-type&gt;java.lang.String&lt;/com.pujie.wristwear.pujieblack.STRING_T=
+ASKER_VARIABLE_VALUE-type&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.loca=
+le.intent.extra.BLURB&gt;%NightTimeNext2 mapped to [tskr_NightTimeNext2]&lt=
+;/com.twofortyfouram.locale.intent.extra.BLURB&gt;<br>=09=09=09=09=09&lt;co=
+m.twofortyfouram.locale.intent.extra.BLURB-type&gt;java.lang.String&lt;/com=
+.twofortyfouram.locale.intent.extra.BLURB-type&gt;<br>=09=09=09=09=09&lt;ne=
+t.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;com.pujie.wristw=
+ear.pujieblack.STRING_TASKER_VARIABLE_VALUE&lt;/net.dinglisch.android.taske=
+r.extras.VARIABLE_REPLACE_KEYS&gt;<br>=09=09=09=09=09&lt;net.dinglisch.andr=
+oid.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;java.lang.String&lt;/net.di=
+nglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;<br>=09=09=09=
+=09=09&lt;net.dinglisch.android.tasker.subbundled&gt;true&lt;/net.dinglisch=
+.android.tasker.subbundled&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.=
+tasker.subbundled-type&gt;java.lang.Boolean&lt;/net.dinglisch.android.taske=
+r.subbundled-type&gt;<br>=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt;/Bundle&=
+gt;<br>=09=09=09&lt;Str sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;&gt;com.puj=
+ie.wristwear.pujieblack&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg2&quo=
+t; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack.tasker.EditVariable=
+Activity&lt;/Str&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg3&quot; val=3D&quot;=
+0&quot;/&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quot;0&quot;/=
+&gt;<br>=09=09&lt;/Action&gt;<br>=09=09&lt;Action sr=3D&quot;act22&quot; ve=
+=3D&quot;7&quot;&gt;<br>=09=09=09&lt;code&gt;2065917220&lt;/code&gt;<br>=09=
+=09=09&lt;Bundle sr=3D&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Vals sr=3D&qu=
+ot;val&quot;&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_V=
+ERSION_CODE&gt;3516&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;=
+<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type=
+&gt;java.lang.Integer&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE-t=
+ype&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_=
+VARIABLE_NAME&gt;%NightTimeNext3&lt;/com.pujie.wristwear.pujieblack.STRING_=
+TASKER_VARIABLE_NAME&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujiebla=
+ck.STRING_TASKER_VARIABLE_NAME-type&gt;java.lang.String&lt;/com.pujie.wrist=
+wear.pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;<br>=09=09=09=09=09&lt;=
+com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;%NightTimeNe=
+xt3&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;<br>=
+=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VA=
+LUE-type&gt;java.lang.String&lt;/com.pujie.wristwear.pujieblack.STRING_TASK=
+ER_VARIABLE_VALUE-type&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.locale.=
+intent.extra.BLURB&gt;%NightTimeNext3 mapped to [tskr_NightTimeNext3]&lt;/c=
+om.twofortyfouram.locale.intent.extra.BLURB&gt;<br>=09=09=09=09=09&lt;com.t=
+wofortyfouram.locale.intent.extra.BLURB-type&gt;java.lang.String&lt;/com.tw=
+ofortyfouram.locale.intent.extra.BLURB-type&gt;<br>=09=09=09=09=09&lt;net.d=
+inglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;com.pujie.wristwear=
+.pujieblack.STRING_TASKER_VARIABLE_VALUE&lt;/net.dinglisch.android.tasker.e=
+xtras.VARIABLE_REPLACE_KEYS&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android=
+.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;java.lang.String&lt;/net.dingl=
+isch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;<br>=09=09=09=09=
+=09&lt;net.dinglisch.android.tasker.subbundled&gt;true&lt;/net.dinglisch.an=
+droid.tasker.subbundled&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tas=
+ker.subbundled-type&gt;java.lang.Boolean&lt;/net.dinglisch.android.tasker.s=
+ubbundled-type&gt;<br>=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt;/Bundle&gt;=
+<br>=09=09=09&lt;Str sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;&gt;com.pujie.=
+wristwear.pujieblack&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg2&quot; =
+ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack.tasker.EditVariableAct=
+ivity&lt;/Str&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg3&quot; val=3D&quot;0&q=
+uot;/&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quot;0&quot;/&gt=
+;<br>=09=09&lt;/Action&gt;<br>=09=09&lt;Action sr=3D&quot;act23&quot; ve=3D=
+&quot;7&quot;&gt;<br>=09=09=09&lt;code&gt;2065917220&lt;/code&gt;<br>=09=09=
+=09&lt;Bundle sr=3D&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Vals sr=3D&quot;=
+val&quot;&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERS=
+ION_CODE&gt;3516&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;<br=
+>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type&gt=
+;java.lang.Integer&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type=
+&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VAR=
+IABLE_NAME&gt;%SunEventTime&lt;/com.pujie.wristwear.pujieblack.STRING_TASKE=
+R_VARIABLE_NAME&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.ST=
+RING_TASKER_VARIABLE_NAME-type&gt;java.lang.String&lt;/com.pujie.wristwear.=
+pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;<br>=09=09=09=09=09&lt;com.p=
+ujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;%SunEventTime&lt;=
+/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;<br>=09=09=
+=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-ty=
+pe&gt;java.lang.String&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VAR=
+IABLE_VALUE-type&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.locale.intent=
+.extra.BLURB&gt;%SunEventTime mapped to [tskr_SunEventTime]&lt;/com.twofort=
+yfouram.locale.intent.extra.BLURB&gt;<br>=09=09=09=09=09&lt;com.twofortyfou=
+ram.locale.intent.extra.BLURB-type&gt;java.lang.String&lt;/com.twofortyfour=
+am.locale.intent.extra.BLURB-type&gt;<br>=09=09=09=09=09&lt;net.dinglisch.a=
+ndroid.tasker.extras.VARIABLE_REPLACE_KEYS&gt;com.pujie.wristwear.pujieblac=
+k.STRING_TASKER_VARIABLE_VALUE&lt;/net.dinglisch.android.tasker.extras.VARI=
+ABLE_REPLACE_KEYS&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.ex=
+tras.VARIABLE_REPLACE_KEYS-type&gt;java.lang.String&lt;/net.dinglisch.andro=
+id.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;<br>=09=09=09=09=09&lt;net.d=
+inglisch.android.tasker.subbundled&gt;true&lt;/net.dinglisch.android.tasker=
+.subbundled&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.subbundl=
+ed-type&gt;java.lang.Boolean&lt;/net.dinglisch.android.tasker.subbundled-ty=
+pe&gt;<br>=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt;/Bundle&gt;<br>=09=09=
+=09&lt;Str sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.=
+pujieblack&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg2&quot; ve=3D&quot=
+;3&quot;&gt;com.pujie.wristwear.pujieblack.tasker.EditVariableActivity&lt;/=
+Str&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg3&quot; val=3D&quot;0&quot;/&gt;<=
+br>=09=09=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quot;0&quot;/&gt;<br>=09=
+=09&lt;/Action&gt;<br>=09=09&lt;Action sr=3D&quot;act24&quot; ve=3D&quot;7&=
+quot;&gt;<br>=09=09=09&lt;code&gt;2065917220&lt;/code&gt;<br>=09=09=09&lt;B=
+undle sr=3D&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Vals sr=3D&quot;val&quot=
+;&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE=
+&gt;3516&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;<br>=09=09=
+=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type&gt;java.l=
+ang.Integer&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type&gt;<br=
+>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_N=
+AME&gt;%WeatherAlert&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIA=
+BLE_NAME&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TA=
+SKER_VARIABLE_NAME-type&gt;java.lang.String&lt;/com.pujie.wristwear.pujiebl=
+ack.STRING_TASKER_VARIABLE_NAME-type&gt;<br>=09=09=09=09=09&lt;com.pujie.wr=
+istwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;%WeatherAlert&lt;/com.pu=
+jie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;<br>=09=09=09=09=
+=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type&gt;=
+java.lang.String&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_=
+VALUE-type&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.locale.intent.extra=
+.BLURB&gt;%WeatherAlert mapped to [tskr_WeatherAlert]&lt;/com.twofortyfoura=
+m.locale.intent.extra.BLURB&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.lo=
+cale.intent.extra.BLURB-type&gt;java.lang.String&lt;/com.twofortyfouram.loc=
+ale.intent.extra.BLURB-type&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android=
+.tasker.extras.VARIABLE_REPLACE_KEYS&gt;com.pujie.wristwear.pujieblack.STRI=
+NG_TASKER_VARIABLE_VALUE&lt;/net.dinglisch.android.tasker.extras.VARIABLE_R=
+EPLACE_KEYS&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.extras.V=
+ARIABLE_REPLACE_KEYS-type&gt;java.lang.String&lt;/net.dinglisch.android.tas=
+ker.extras.VARIABLE_REPLACE_KEYS-type&gt;<br>=09=09=09=09=09&lt;net.dinglis=
+ch.android.tasker.subbundled&gt;true&lt;/net.dinglisch.android.tasker.subbu=
+ndled&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.subbundled-typ=
+e&gt;java.lang.Boolean&lt;/net.dinglisch.android.tasker.subbundled-type&gt;=
+<br>=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt;/Bundle&gt;<br>=09=09=09&lt;S=
+tr sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujiebla=
+ck&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg2&quot; ve=3D&quot;3&quot;=
+&gt;com.pujie.wristwear.pujieblack.tasker.EditVariableActivity&lt;/Str&gt;<=
+br>=09=09=09&lt;Int sr=3D&quot;arg3&quot; val=3D&quot;0&quot;/&gt;<br>=09=
+=09=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quot;0&quot;/&gt;<br>=09=09&lt;/=
+Action&gt;<br>=09=09&lt;Action sr=3D&quot;act3&quot; ve=3D&quot;7&quot;&gt;=
+<br>=09=09=09&lt;code&gt;2065917220&lt;/code&gt;<br>=09=09=09&lt;Bundle sr=
+=3D&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Vals sr=3D&quot;val&quot;&gt;<br=
+>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;3516=
+&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;<br>=09=09=09=09=09=
+&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type&gt;java.lang.Integ=
+er&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type&gt;<br>=09=09=
+=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME&gt;=
+%WeatherSummary&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_N=
+AME&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_=
+VARIABLE_NAME-type&gt;java.lang.String&lt;/com.pujie.wristwear.pujieblack.S=
+TRING_TASKER_VARIABLE_NAME-type&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwe=
+ar.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;%WeatherSummary&lt;/com.pujie=
+.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;<br>=09=09=09=09=09&l=
+t;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type&gt;java.=
+lang.String&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE=
+-type&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.locale.intent.extra.BLUR=
+B&gt;%WeatherSummary mapped to [tskr_WeatherSummary]&lt;/com.twofortyfouram=
+.locale.intent.extra.BLURB&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.loc=
+ale.intent.extra.BLURB-type&gt;java.lang.String&lt;/com.twofortyfouram.loca=
+le.intent.extra.BLURB-type&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.=
+tasker.extras.VARIABLE_REPLACE_KEYS&gt;com.pujie.wristwear.pujieblack.STRIN=
+G_TASKER_VARIABLE_VALUE&lt;/net.dinglisch.android.tasker.extras.VARIABLE_RE=
+PLACE_KEYS&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.extras.VA=
+RIABLE_REPLACE_KEYS-type&gt;java.lang.String&lt;/net.dinglisch.android.task=
+er.extras.VARIABLE_REPLACE_KEYS-type&gt;<br>=09=09=09=09=09&lt;net.dinglisc=
+h.android.tasker.subbundled&gt;true&lt;/net.dinglisch.android.tasker.subbun=
+dled&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.subbundled-type=
+&gt;java.lang.Boolean&lt;/net.dinglisch.android.tasker.subbundled-type&gt;<=
+br>=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt;/Bundle&gt;<br>=09=09=09&lt;St=
+r sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblac=
+k&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg2&quot; ve=3D&quot;3&quot;&=
+gt;com.pujie.wristwear.pujieblack.tasker.EditVariableActivity&lt;/Str&gt;<b=
+r>=09=09=09&lt;Int sr=3D&quot;arg3&quot; val=3D&quot;0&quot;/&gt;<br>=09=09=
+=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quot;0&quot;/&gt;<br>=09=09&lt;/Act=
+ion&gt;<br>=09=09&lt;Action sr=3D&quot;act4&quot; ve=3D&quot;7&quot;&gt;<br=
+>=09=09=09&lt;code&gt;2065917220&lt;/code&gt;<br>=09=09=09&lt;Bundle sr=3D&=
+quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Vals sr=3D&quot;val&quot;&gt;<br>=09=
+=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;3516&lt;=
+/com.pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;<br>=09=09=09=09=09&lt;=
+com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type&gt;java.lang.Integer&l=
+t;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type&gt;<br>=09=09=09=09=
+=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME&gt;%Weath=
+erIcon&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME&gt;<b=
+r>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_=
+NAME-type&gt;java.lang.String&lt;/com.pujie.wristwear.pujieblack.STRING_TAS=
+KER_VARIABLE_NAME-type&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieb=
+lack.STRING_TASKER_VARIABLE_VALUE&gt;%WeatherIcon&lt;/com.pujie.wristwear.p=
+ujieblack.STRING_TASKER_VARIABLE_VALUE&gt;<br>=09=09=09=09=09&lt;com.pujie.=
+wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type&gt;java.lang.String&=
+lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type&gt;<br=
+>=09=09=09=09=09&lt;com.twofortyfouram.locale.intent.extra.BLURB&gt;%Weathe=
+rIcon mapped to [tskr_WeatherIcon]&lt;/com.twofortyfouram.locale.intent.ext=
+ra.BLURB&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.locale.intent.extra.B=
+LURB-type&gt;java.lang.String&lt;/com.twofortyfouram.locale.intent.extra.BL=
+URB-type&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.extras.VARI=
+ABLE_REPLACE_KEYS&gt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_=
+VALUE&lt;/net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;<br>=
+=09=09=09=09=09&lt;net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEY=
+S-type&gt;java.lang.String&lt;/net.dinglisch.android.tasker.extras.VARIABLE=
+_REPLACE_KEYS-type&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.s=
+ubbundled&gt;true&lt;/net.dinglisch.android.tasker.subbundled&gt;<br>=09=09=
+=09=09=09&lt;net.dinglisch.android.tasker.subbundled-type&gt;java.lang.Bool=
+ean&lt;/net.dinglisch.android.tasker.subbundled-type&gt;<br>=09=09=09=09&lt=
+;/Vals&gt;<br>=09=09=09&lt;/Bundle&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg1&=
+quot; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack&lt;/Str&gt;<br>=
+=09=09=09&lt;Str sr=3D&quot;arg2&quot; ve=3D&quot;3&quot;&gt;com.pujie.wris=
+twear.pujieblack.tasker.EditVariableActivity&lt;/Str&gt;<br>=09=09=09&lt;In=
+t sr=3D&quot;arg3&quot; val=3D&quot;0&quot;/&gt;<br>=09=09=09&lt;Int sr=3D&=
+quot;arg4&quot; val=3D&quot;0&quot;/&gt;<br>=09=09&lt;/Action&gt;<br>=09=09=
+&lt;Action sr=3D&quot;act5&quot; ve=3D&quot;7&quot;&gt;<br>=09=09=09&lt;cod=
+e&gt;2065917220&lt;/code&gt;<br>=09=09=09&lt;Bundle sr=3D&quot;arg0&quot;&g=
+t;<br>=09=09=09=09&lt;Vals sr=3D&quot;val&quot;&gt;<br>=09=09=09=09=09&lt;c=
+om.pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;3516&lt;/com.pujie.wristw=
+ear.pujieblack.INT_VERSION_CODE&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwe=
+ar.pujieblack.INT_VERSION_CODE-type&gt;java.lang.Integer&lt;/com.pujie.wris=
+twear.pujieblack.INT_VERSION_CODE-type&gt;<br>=09=09=09=09=09&lt;com.pujie.=
+wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME&gt;%Precipitation&lt;/com.=
+pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME&gt;<br>=09=09=09=09=
+=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;j=
+ava.lang.String&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_N=
+AME-type&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TA=
+SKER_VARIABLE_VALUE&gt;%Precipitation&lt;/com.pujie.wristwear.pujieblack.ST=
+RING_TASKER_VARIABLE_VALUE&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pu=
+jieblack.STRING_TASKER_VARIABLE_VALUE-type&gt;java.lang.String&lt;/com.puji=
+e.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type&gt;<br>=09=09=09=
+=09=09&lt;com.twofortyfouram.locale.intent.extra.BLURB&gt;%Precipitation ma=
+pped to [tskr_Precipitation]&lt;/com.twofortyfouram.locale.intent.extra.BLU=
+RB&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.locale.intent.extra.BLURB-t=
+ype&gt;java.lang.String&lt;/com.twofortyfouram.locale.intent.extra.BLURB-ty=
+pe&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.extras.VARIABLE_R=
+EPLACE_KEYS&gt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&=
+lt;/net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;<br>=09=09=
+=09=09=09&lt;net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type=
+&gt;java.lang.String&lt;/net.dinglisch.android.tasker.extras.VARIABLE_REPLA=
+CE_KEYS-type&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.subbund=
+led&gt;true&lt;/net.dinglisch.android.tasker.subbundled&gt;<br>=09=09=09=09=
+=09&lt;net.dinglisch.android.tasker.subbundled-type&gt;java.lang.Boolean&lt=
+;/net.dinglisch.android.tasker.subbundled-type&gt;<br>=09=09=09=09&lt;/Vals=
+&gt;<br>=09=09=09&lt;/Bundle&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg1&quot; =
+ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack&lt;/Str&gt;<br>=09=09=
+=09&lt;Str sr=3D&quot;arg2&quot; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.=
+pujieblack.tasker.EditVariableActivity&lt;/Str&gt;<br>=09=09=09&lt;Int sr=
+=3D&quot;arg3&quot; val=3D&quot;0&quot;/&gt;<br>=09=09=09&lt;Int sr=3D&quot=
+;arg4&quot; val=3D&quot;0&quot;/&gt;<br>=09=09&lt;/Action&gt;<br>=09=09&lt;=
+Action sr=3D&quot;act6&quot; ve=3D&quot;7&quot;&gt;<br>=09=09=09&lt;code&gt=
+;2065917220&lt;/code&gt;<br>=09=09=09&lt;Bundle sr=3D&quot;arg0&quot;&gt;<b=
+r>=09=09=09=09&lt;Vals sr=3D&quot;val&quot;&gt;<br>=09=09=09=09=09&lt;com.p=
+ujie.wristwear.pujieblack.INT_VERSION_CODE&gt;33577&lt;/com.pujie.wristwear=
+.pujieblack.INT_VERSION_CODE&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.=
+pujieblack.INT_VERSION_CODE-type&gt;java.lang.Integer&lt;/com.pujie.wristwe=
+ar.pujieblack.INT_VERSION_CODE-type&gt;<br>=09=09=09=09=09&lt;com.pujie.wri=
+stwear.pujieblack.STRING_TASKER_VARIABLE_NAME&gt;%Humidity&lt;/com.pujie.wr=
+istwear.pujieblack.STRING_TASKER_VARIABLE_NAME&gt;<br>=09=09=09=09=09&lt;co=
+m.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;java.lang.=
+String&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_NAME-type&=
+gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARI=
+ABLE_VALUE&gt;%Humidity&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VA=
+RIABLE_VALUE&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRIN=
+G_TASKER_VARIABLE_VALUE-type&gt;java.lang.String&lt;/com.pujie.wristwear.pu=
+jieblack.STRING_TASKER_VARIABLE_VALUE-type&gt;<br>=09=09=09=09=09&lt;com.tw=
+ofortyfouram.locale.intent.extra.BLURB&gt;%Humidity mapped to [tskr_Humidit=
+y]&lt;/com.twofortyfouram.locale.intent.extra.BLURB&gt;<br>=09=09=09=09=09&=
+lt;com.twofortyfouram.locale.intent.extra.BLURB-type&gt;java.lang.String&lt=
+;/com.twofortyfouram.locale.intent.extra.BLURB-type&gt;<br>=09=09=09=09=09&=
+lt;net.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;com.pujie.w=
+ristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&lt;/net.dinglisch.android.=
+tasker.extras.VARIABLE_REPLACE_KEYS&gt;<br>=09=09=09=09=09&lt;net.dinglisch=
+.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;java.lang.String&lt;/n=
+et.dinglisch.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;<br>=09=09=
+=09=09=09&lt;net.dinglisch.android.tasker.subbundled&gt;true&lt;/net.dingli=
+sch.android.tasker.subbundled&gt;<br>=09=09=09=09=09&lt;net.dinglisch.andro=
+id.tasker.subbundled-type&gt;java.lang.Boolean&lt;/net.dinglisch.android.ta=
+sker.subbundled-type&gt;<br>=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt;/Bund=
+le&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;&gt;com.=
+pujie.wristwear.pujieblack&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg2&=
+quot; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack.tasker.EditVaria=
+bleActivity&lt;/Str&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg3&quot; val=3D&qu=
+ot;0&quot;/&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quot;0&quo=
+t;/&gt;<br>=09=09&lt;/Action&gt;<br>=09=09&lt;Action sr=3D&quot;act7&quot; =
+ve=3D&quot;7&quot;&gt;<br>=09=09=09&lt;code&gt;2065917220&lt;/code&gt;<br>=
+=09=09=09&lt;Bundle sr=3D&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Vals sr=3D=
+&quot;val&quot;&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.IN=
+T_VERSION_CODE&gt;3516&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE&=
+gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE-t=
+ype&gt;java.lang.Integer&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_COD=
+E-type&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASK=
+ER_VARIABLE_NAME&gt;%Temperature&lt;/com.pujie.wristwear.pujieblack.STRING_=
+TASKER_VARIABLE_NAME&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujiebla=
+ck.STRING_TASKER_VARIABLE_NAME-type&gt;java.lang.String&lt;/com.pujie.wrist=
+wear.pujieblack.STRING_TASKER_VARIABLE_NAME-type&gt;<br>=09=09=09=09=09&lt;=
+com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;%Temperature=
+&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;<br>=09=
+=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE=
+-type&gt;java.lang.String&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_=
+VARIABLE_VALUE-type&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.locale.int=
+ent.extra.BLURB&gt;%Temperature mapped to [tskr_Temperature]&lt;/com.twofor=
+tyfouram.locale.intent.extra.BLURB&gt;<br>=09=09=09=09=09&lt;com.twofortyfo=
+uram.locale.intent.extra.BLURB-type&gt;java.lang.String&lt;/com.twofortyfou=
+ram.locale.intent.extra.BLURB-type&gt;<br>=09=09=09=09=09&lt;net.dinglisch.=
+android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;com.pujie.wristwear.pujiebla=
+ck.STRING_TASKER_VARIABLE_VALUE&lt;/net.dinglisch.android.tasker.extras.VAR=
+IABLE_REPLACE_KEYS&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.e=
+xtras.VARIABLE_REPLACE_KEYS-type&gt;java.lang.String&lt;/net.dinglisch.andr=
+oid.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;<br>=09=09=09=09=09&lt;net.=
+dinglisch.android.tasker.subbundled&gt;true&lt;/net.dinglisch.android.taske=
+r.subbundled&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.subbund=
+led-type&gt;java.lang.Boolean&lt;/net.dinglisch.android.tasker.subbundled-t=
+ype&gt;<br>=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt;/Bundle&gt;<br>=09=09=
+=09&lt;Str sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.=
+pujieblack&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg2&quot; ve=3D&quot=
+;3&quot;&gt;com.pujie.wristwear.pujieblack.tasker.EditVariableActivity&lt;/=
+Str&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg3&quot; val=3D&quot;0&quot;/&gt;<=
+br>=09=09=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quot;0&quot;/&gt;<br>=09=
+=09&lt;/Action&gt;<br>=09=09&lt;Action sr=3D&quot;act8&quot; ve=3D&quot;7&q=
+uot;&gt;<br>=09=09=09&lt;code&gt;2065917220&lt;/code&gt;<br>=09=09=09&lt;Bu=
+ndle sr=3D&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Vals sr=3D&quot;val&quot;=
+&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE&=
+gt;3516&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;<br>=09=09=
+=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type&gt;java.l=
+ang.Integer&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type&gt;<br=
+>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_N=
+AME&gt;%NextTemperature&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VA=
+RIABLE_NAME&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING=
+_TASKER_VARIABLE_NAME-type&gt;java.lang.String&lt;/com.pujie.wristwear.puji=
+eblack.STRING_TASKER_VARIABLE_NAME-type&gt;<br>=09=09=09=09=09&lt;com.pujie=
+.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;%NextTemperature&lt;/=
+com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;<br>=09=09=
+=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-ty=
+pe&gt;java.lang.String&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VAR=
+IABLE_VALUE-type&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.locale.intent=
+.extra.BLURB&gt;%NextTemperature mapped to [tskr_NextTemperature]&lt;/com.t=
+wofortyfouram.locale.intent.extra.BLURB&gt;<br>=09=09=09=09=09&lt;com.twofo=
+rtyfouram.locale.intent.extra.BLURB-type&gt;java.lang.String&lt;/com.twofor=
+tyfouram.locale.intent.extra.BLURB-type&gt;<br>=09=09=09=09=09&lt;net.dingl=
+isch.android.tasker.extras.VARIABLE_REPLACE_KEYS&gt;com.pujie.wristwear.puj=
+ieblack.STRING_TASKER_VARIABLE_VALUE&lt;/net.dinglisch.android.tasker.extra=
+s.VARIABLE_REPLACE_KEYS&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tas=
+ker.extras.VARIABLE_REPLACE_KEYS-type&gt;java.lang.String&lt;/net.dinglisch=
+.android.tasker.extras.VARIABLE_REPLACE_KEYS-type&gt;<br>=09=09=09=09=09&lt=
+;net.dinglisch.android.tasker.subbundled&gt;true&lt;/net.dinglisch.android.=
+tasker.subbundled&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.su=
+bbundled-type&gt;java.lang.Boolean&lt;/net.dinglisch.android.tasker.subbund=
+led-type&gt;<br>=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt;/Bundle&gt;<br>=
+=09=09=09&lt;Str sr=3D&quot;arg1&quot; ve=3D&quot;3&quot;&gt;com.pujie.wris=
+twear.pujieblack&lt;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg2&quot; ve=
+=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack.tasker.EditVariableActiv=
+ity&lt;/Str&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg3&quot; val=3D&quot;0&quo=
+t;/&gt;<br>=09=09=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quot;0&quot;/&gt;<=
+br>=09=09&lt;/Action&gt;<br>=09=09&lt;Action sr=3D&quot;act9&quot; ve=3D&qu=
+ot;7&quot;&gt;<br>=09=09=09&lt;code&gt;2065917220&lt;/code&gt;<br>=09=09=09=
+&lt;Bundle sr=3D&quot;arg0&quot;&gt;<br>=09=09=09=09&lt;Vals sr=3D&quot;val=
+&quot;&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION=
+_CODE&gt;3516&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE&gt;<br>=
+=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type&gt;=
+java.lang.Integer&lt;/com.pujie.wristwear.pujieblack.INT_VERSION_CODE-type&=
+gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARI=
+ABLE_NAME&gt;%NightTime&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VA=
+RIABLE_NAME&gt;<br>=09=09=09=09=09&lt;com.pujie.wristwear.pujieblack.STRING=
+_TASKER_VARIABLE_NAME-type&gt;java.lang.String&lt;/com.pujie.wristwear.puji=
+eblack.STRING_TASKER_VARIABLE_NAME-type&gt;<br>=09=09=09=09=09&lt;com.pujie=
+.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;%NightTime&lt;/com.pu=
+jie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE&gt;<br>=09=09=09=09=
+=09&lt;com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_VALUE-type&gt;=
+java.lang.String&lt;/com.pujie.wristwear.pujieblack.STRING_TASKER_VARIABLE_=
+VALUE-type&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.locale.intent.extra=
+.BLURB&gt;%NightTime mapped to [tskr_NightTime]&lt;/com.twofortyfouram.loca=
+le.intent.extra.BLURB&gt;<br>=09=09=09=09=09&lt;com.twofortyfouram.locale.i=
+ntent.extra.BLURB-type&gt;java.lang.String&lt;/com.twofortyfouram.locale.in=
+tent.extra.BLURB-type&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.taske=
+r.extras.VARIABLE_REPLACE_KEYS&gt;com.pujie.wristwear.pujieblack.STRING_TAS=
+KER_VARIABLE_VALUE&lt;/net.dinglisch.android.tasker.extras.VARIABLE_REPLACE=
+_KEYS&gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.extras.VARIABL=
+E_REPLACE_KEYS-type&gt;java.lang.String&lt;/net.dinglisch.android.tasker.ex=
+tras.VARIABLE_REPLACE_KEYS-type&gt;<br>=09=09=09=09=09&lt;net.dinglisch.and=
+roid.tasker.subbundled&gt;true&lt;/net.dinglisch.android.tasker.subbundled&=
+gt;<br>=09=09=09=09=09&lt;net.dinglisch.android.tasker.subbundled-type&gt;j=
+ava.lang.Boolean&lt;/net.dinglisch.android.tasker.subbundled-type&gt;<br>=
+=09=09=09=09&lt;/Vals&gt;<br>=09=09=09&lt;/Bundle&gt;<br>=09=09=09&lt;Str s=
+r=3D&quot;arg1&quot; ve=3D&quot;3&quot;&gt;com.pujie.wristwear.pujieblack&l=
+t;/Str&gt;<br>=09=09=09&lt;Str sr=3D&quot;arg2&quot; ve=3D&quot;3&quot;&gt;=
+com.pujie.wristwear.pujieblack.tasker.EditVariableActivity&lt;/Str&gt;<br>=
+=09=09=09&lt;Int sr=3D&quot;arg3&quot; val=3D&quot;0&quot;/&gt;<br>=09=09=
+=09&lt;Int sr=3D&quot;arg4&quot; val=3D&quot;0&quot;/&gt;<br>=09=09&lt;/Act=
+ion&gt;<br>=09&lt;/Task&gt;<br>&lt;/TaskerData&gt;<br>=C2=A0</div>
+
+--000000000000190ea005f8c47761--
