@@ -1,4 +1,9 @@
 var response = readFile(http_file_output);
+// Moon, sunrise, sunset must be it's own daily call, not able to get with hourly weather data.
+// Example moonphase, sunrise, sunset:
+// https://api.tomorrow.io/v4/timelines?location=41.9958219,-88.6987461&fields=moonPhase,sunriseTime,sunsetTime&timesteps=1d&startTime=now&endTime=nowPlus1d&units=imperial&apikey=REDACTED
+// Example 6 hours forward of desired weather fields:
+// https://api.tomorrow.io/v4/timelines?location=41.9958219,-88.6987461&fields=humidity,precipitationProbability,temperature,temperatureApparent,weatherCode,windDirection,windSpeed&timesteps=1h&startTime=now&endTime=nowPlus6h&units=imperial&apikey=REDACTED
 response = response.replace("&amp;&amp;", "").replace("\n", "");
 setGlobal("JsonStringData", response);
 
