@@ -3,48 +3,45 @@ response = response.replace('&&','').replace('\n','');
 setGlobal("JsonStringData", response);
 
 response = JSON.parse(response);
-var timelines = response.data.timelines[0].intervals;
-
-//var day = response.daily.data[0];
-var now = timelines[0].values;
-var next = timelines[2].values;
-var next2 = timelines[4].values;
-var next3 = timelines[6].values;
-//var alerts = !! response.alerts;
-
-// Humidity
-setGlobal("Humidity", now.humidity);
-
-//setGlobal("WeatherAlert", alerts);
-
-// Moon
-//var moonPhase = Math.floor(day.moonPhase*16);
-//setGlobal("MoonPhase", moonPhase);
-
-// Summary
-//setGlobal("WeatherSummary", now.weatherCode);
-
-// Icons
-setGlobal("WeatherIcon", now.weatherCode);
-setGlobal("WeatherIconNext", next.weatherCode);
-setGlobal("WeatherIconNext2", next2.weatherCode);
-setGlobal("WeatherIconNext3", next3.weatherCode);
-
-// Precipitation
-setGlobal("Precipitation", hour.precipitationProbability);
-
-// Temperature
-setGlobal("Temperature", Math.round(now.apparentTemperature));
-setGlobal("NextTemperature", Math.round(next.apparentTemperature));
-setGlobal("NextTemperature2", Math.round(next2.apparentTemperature));
-setGlobal("NextTemperature3", Math.round(next3.apparentTemperature));
-setGlobal("MaxTemp", Math.round(day.apparentTemperatureMax));
-setGlobal("MinTemp", Math.round(day.apparentTemperatureMin));
+var day = response.data.timelines[0];
+var hourly = response.data.timelines[1];
+var current = response.data.timelines[2];
 
 // Time
-var dateNow = new Date(now.time*1000);
+var dateNow = new Date();
 
-var nextTime = new Date(next.time*1000).getHours();
+// Moon
+setGlobal("MoonPhase", day.intervals[0].values.moonPhase);
+
+// Humidity
+setGlobal("Humidity", Math.round(current.intervals[0].values.humidity));
+
+// Deprecated.
+//var alerts = !! response.alerts;
+//setGlobal("WeatherAlert", alerts);
+
+// Summary
+setGlobal("WeatherSummary", current.intervals[0].values.weatherCode);
+
+// Icons
+setGlobal("WeatherIcon", current.intervals[0].values.weatherCode);
+setGlobal("WeatherIconNext", hourly.intervals[2].values.weatherCode);
+setGlobal("WeatherIconNext2", hourly.intervals[4].values.weatherCode);
+setGlobal("WeatherIconNext3", hourly.intervals[6].values.weatherCode);
+
+// Precipitation
+setGlobal("Precipitation", current.intervals[0].values.precipitationProbability);
+
+// Temperature
+setGlobal("Temperature", Math.round(current.intervals[0].values.apparentTemperature));
+setGlobal("NextTemperature", Math.round(hourly.intervals[2].values.apparentTemperature));
+setGlobal("NextTemperature2", Math.round(hourly.intervals[4].values.apparentTemperature));
+setGlobal("NextTemperature3", Math.round(hourly.intervals[6].values.apparentTemperature));
+setGlobal("MaxTemp", Math.round(day.intervals[0].values.temperatureApparentMax));
+setGlobal("MinTemp", Math.round(day.intervals[0].values.temperatureApparentMin));
+
+// Time
+var nextTime = new Date(hourly.intervals[2].startTime).getHours();
 if(0==nextTime){
   nextTime = "12am";
 } else if (12==nextTime){
@@ -53,7 +50,7 @@ if(0==nextTime){
   nextTime = nextTime > 12 ? nextTime - 12 + "pm" : nextTime + "am";
 }
 
-var nextTime2 = new Date(next2.time*1000).getHours();
+var nextTime2 = new Date(hourly.intervals[4].startTime).getHours();
 if(0==nextTime2){
   nextTime2 = "12am";
 } else if (12==nextTime2){
@@ -62,7 +59,7 @@ if(0==nextTime2){
   nextTime2 = nextTime2 > 12 ? nextTime2 - 12 + "pm" : nextTime2 + "am";
 }
 
-var nextTime3 = new Date(next3.time*1000).getHours();
+var nextTime3 = new Date(hourly.intervals[6].startTime).getHours();
 if(0==nextTime3){
   nextTime3 = "12am";
 } else if (12==nextTime3){
@@ -72,11 +69,8 @@ if(0==nextTime3){
 }
 
 setGlobal("TimeChecked", dateNow.getHours() + ":" + dateNow.getMinutes());
-
 setGlobal("NextTime", nextTime);
-
 setGlobal("NextTime2", nextTime2);
-
 setGlobal("NextTime3", nextTime3);
 
 // Nighttime
