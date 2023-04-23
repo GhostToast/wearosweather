@@ -110,21 +110,25 @@ setGlobal("NightTimeNext", nextTimeDate > dayOneSunset || nextTimeDate < dayOneS
 setGlobal("NightTimeNext2", nextTime2Date > dayOneSunset || nextTime2Date < dayOneSunrise);
 setGlobal("NightTimeNext3", nextTime3Date > dayOneSunset || nextTime3Date < dayOneSunrise);
 
-var dateSun = new Date(nightTime ? day.sunriseTime*1000 : day.sunsetTime*1000);
+if (nowTime > dayOneSunrise && nowTime < dayOneSunset) {
+  var dateSun = dayOneSunset;
+} else {
+  var dateSun = dayTwosunrise;
+}
 var dateSunHours = dateSun.getHours();
 if(dateSunHours > 12) {
-dateSunHours = dateSunHours - 12;
+  dateSunHours = dateSunHours - 12;
 }
 var sunMinutes = dateSun.getMinutes();
 if (sunMinutes < 10) {
-sunMinutes = "0" + sunMinutes;
+  sunMinutes = "0" + sunMinutes;
 }
 setGlobal("SunEventTime", dateSunHours  + ":" + sunMinutes);
 
 // Wind
-setGlobal("WindSpeed", Math.round(now.windSpeed));
+setGlobal("WindSpeed", Math.round(current.intervals[0].values.windSpeed));
 var bearing = 0;
-if (typeof now.windBearing !== 'undefined') {
-bearing = Math.round(now.windBearing);
+if (typeof current.intervals[0].values.windDirection !== 'undefined') {
+  bearing = Math.round(current.intervals[0].values.windDirection);
 }
 setGlobal("WindBearing", bearing);
