@@ -8,7 +8,7 @@ var hourly = response.data.timelines[1];
 var current = response.data.timelines[2];
 
 // Time
-var dateNow = new Date();
+var nowTime = new Date();
 
 // Moon
 setGlobal("MoonPhase", day.intervals[0].values.moonPhase);
@@ -16,12 +16,35 @@ setGlobal("MoonPhase", day.intervals[0].values.moonPhase);
 // Humidity
 setGlobal("Humidity", Math.round(current.intervals[0].values.humidity));
 
-// Deprecated.
-//var alerts = !! response.alerts;
-//setGlobal("WeatherAlert", alerts);
+var weatherCodesArray = [
+  0: "Unknown",
+  1000: "Clear, Sunny",
+  1100: "Mostly Clear",
+  1101: "Partly Cloudy",
+  1102: "Mostly Cloudy",
+  1001: "Cloudy",
+  2000: "Fog",
+  2100: "Light Fog",
+  4000: "Drizzle",
+  4001: "Rain",
+  4200: "Light Rain",
+  4201: "Heavy Rain",
+  5000: "Snow",
+  5001: "Flurries",
+  5100: "Light Snow",
+  5101: "Heavy Snow",
+  6000: "Freezing Drizzle",
+  6001: "Freezing Rain",
+  6200: "Light Freezing Rain",
+  6201: "Heavy Freezing Rain",
+  7000: "Ice Pellets",
+  7101: "Heavy Ice Pellets",
+  7102: "Light Ice Pellets",
+  8000: "Thunderstorm"
+];
 
 // Summary
-setGlobal("WeatherSummary", current.intervals[0].values.weatherCode);
+setGlobal("WeatherSummary", weatherCodesArray[current.intervals[0].values.weatherCode]);
 
 // Icons
 setGlobal("WeatherIcon", current.intervals[0].values.weatherCode);
@@ -41,7 +64,8 @@ setGlobal("MaxTemp", Math.round(day.intervals[0].values.temperatureApparentMax))
 setGlobal("MinTemp", Math.round(day.intervals[0].values.temperatureApparentMin));
 
 // Time
-var nextTime = new Date(hourly.intervals[2].startTime).getHours();
+var nextTimeDate = new Date(hourly.intervals[2].startTime)
+var nextTime = nextTimeDate.getHours();
 if(0==nextTime){
   nextTime = "12am";
 } else if (12==nextTime){
@@ -50,7 +74,8 @@ if(0==nextTime){
   nextTime = nextTime > 12 ? nextTime - 12 + "pm" : nextTime + "am";
 }
 
-var nextTime2 = new Date(hourly.intervals[4].startTime).getHours();
+var nextTime2Date = new Date(hourly.intervals[4].startTime)
+var nextTime2 = nextTime2Date.getHours();
 if(0==nextTime2){
   nextTime2 = "12am";
 } else if (12==nextTime2){
@@ -59,7 +84,8 @@ if(0==nextTime2){
   nextTime2 = nextTime2 > 12 ? nextTime2 - 12 + "pm" : nextTime2 + "am";
 }
 
-var nextTime3 = new Date(hourly.intervals[6].startTime).getHours();
+var nextTime3Date = new Date(hourly.intervals[6].startTime)
+var nextTime3 = nextTime3Date.getHours();
 if(0==nextTime3){
   nextTime3 = "12am";
 } else if (12==nextTime3){
@@ -68,20 +94,21 @@ if(0==nextTime3){
   nextTime3 = nextTime3 > 12 ? nextTime3 - 12 + "pm" : nextTime3 + "am";
 }
 
-setGlobal("TimeChecked", dateNow.getHours() + ":" + dateNow.getMinutes());
+setGlobal("TimeChecked", nowTime.getHours() + ":" + nowTime.getMinutes());
 setGlobal("NextTime", nextTime);
 setGlobal("NextTime2", nextTime2);
 setGlobal("NextTime3", nextTime3);
 
 // Nighttime
-var nightTime = now.time > day.sunsetTime || now.time < day.sunriseTime;
-setGlobal("NightTime", now.time > day.sunsetTime || now.time < day.sunriseTime);
+var dayOneSunset = new Date(day.intervals[0].values.sunsetTime);
+var dayOneSunrise = new Date(day.intervals[0].values.sunriseTime);
+var dayTwoSunrise = new Date(day.intervals[1].values.sunriseTime);
+var nightTime = nowTime > dayOneSunset || nowTime < dayOneSunrise;
+setGlobal("NightTime", nightTime);
 
-setGlobal("NightTimeNext", next.time > day.sunsetTime || next.time < day.sunriseTime);
-
-setGlobal("NightTimeNext2", next2.time > day.sunsetTime || next2.time < day.sunriseTime);
-
-setGlobal("NightTimeNext3", next3.time > day.sunsetTime || next3.time < day.sunriseTime);
+setGlobal("NightTimeNext", nextTimeDate > dayOneSunset || nextTimeDate < dayOneSunrise);
+setGlobal("NightTimeNext2", nextTime2Date > dayOneSunset || nextTime2Date < dayOneSunrise);
+setGlobal("NightTimeNext3", nextTime3Date > dayOneSunset || nextTime3Date < dayOneSunrise);
 
 var dateSun = new Date(nightTime ? day.sunriseTime*1000 : day.sunsetTime*1000);
 var dateSunHours = dateSun.getHours();
