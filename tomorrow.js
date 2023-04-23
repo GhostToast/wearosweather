@@ -16,7 +16,7 @@ setGlobal("MoonPhase", day.intervals[0].values.moonPhase);
 // Humidity
 setGlobal("Humidity", Math.round(current.intervals[0].values.humidity));
 
-var weatherCodesArray = [
+var weatherCodesObj = {
   0: "Unknown",
   1000: "Clear, Sunny",
   1100: "Mostly Clear",
@@ -41,10 +41,10 @@ var weatherCodesArray = [
   7101: "Heavy Ice Pellets",
   7102: "Light Ice Pellets",
   8000: "Thunderstorm"
-];
+};
 
 // Summary
-setGlobal("WeatherSummary", weatherCodesArray[current.intervals[0].values.weatherCode]);
+setGlobal("WeatherSummary", weatherCodesObj[current.intervals[0].values.weatherCode]);
 
 // Icons
 setGlobal("WeatherIcon", current.intervals[0].values.weatherCode);
