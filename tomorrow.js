@@ -13,7 +13,7 @@ var current = response.data.timelines[2];
 var nowTime = new Date();
 
 // Moon
-setGlobal("MoonPhase", day.intervals[0].values.moonPhase);
+setGlobal("MoonPhase", day.intervals[0].values.moonPhase*2);
 
 // Humidity
 setGlobal("Humidity", Math.round(current.intervals[0].values.humidity));
