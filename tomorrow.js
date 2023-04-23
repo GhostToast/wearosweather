@@ -1,5 +1,5 @@
 // Sample call:
-// https://api.tomorrow.io/v4/timelines?location=41.9958219,-88.6987461&fields=temperatureApparentMax,temperatureApparentMin,humidity,precipitationProbability,temperatureApparent,weatherCode,windDirection,windSpeed,moonPhase,sunriseTime,sunsetTime&timesteps=current,1h,1d&startTime=now&endTime=nowPlus1d&units=imperial&apikey=REDACTED
+// https://api.tomorrow.io/v4/timelines?location=41.9958219,-88.6987461&fields=temperature,temperatureApparentMax,temperatureApparentMin,humidity,precipitationProbability,temperatureApparent,weatherCode,windDirection,windSpeed,moonPhase,sunriseTime,sunsetTime&timesteps=current,1h,1d&startTime=now&endTime=nowPlus1d&units=imperial&apikey=REDACTED
 var response = readFile(http_file_output);
 response = response.replace('&&','').replace('\n','');
 setGlobal("JsonStringData", response);
