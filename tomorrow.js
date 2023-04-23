@@ -18,23 +18,6 @@ setGlobal("MoonPhase", day.intervals[0].values.moonPhase);
 // Humidity
 setGlobal("Humidity", Math.round(current.intervals[0].values.humidity));
 
-
-     'clear-day': 'day',
-      'clear-night': 'night',
-      'rain': 'rainy-5',
-      'snow': 'snowy-6',
-      'sleet': 'rainy-6',
-      'wind': 'cloudy',
-      'fog': 'cloudy',
-      'cloudy': 'cloudy',
-      'partly-cloudy-day': 'cloudy-day-3',
-      'partly-cloudy-night': 'cloudy-night-3',
-      'hail': 'rainy-7',
-      'lightning': 'thunder',
-      'thunderstorm': 'thunder',
-      'windy-variant': html`cloudy-${this.dayOrNight}-3`,
-      'exceptional': '!!',
-
 var weatherCodesObj = {
   0: { text: "Unknown", code: "unknown" },
   1000: { text: "Clear, Sunny", code: "clear-day" },
