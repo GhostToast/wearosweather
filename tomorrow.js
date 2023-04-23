@@ -58,6 +58,7 @@ setGlobal("WeatherIconNext3", hourly.intervals[6].values.weatherCode);
 setGlobal("Precipitation", current.intervals[0].values.precipitationProbability);
 
 // Temperature
+setGlobal("ActualTemperature", Math.round(current.intervals[0].values.temperature));
 setGlobal("Temperature", Math.round(current.intervals[0].values.temperatureApparent));
 setGlobal("NextTemperature", Math.round(hourly.intervals[2].values.temperatureApparent));
 setGlobal("NextTemperature2", Math.round(hourly.intervals[4].values.temperatureApparent));
