@@ -20,7 +20,7 @@ setGlobal("Humidity", Math.round(current.intervals[0].values.humidity));
 
 var weatherCodesObj = {
   0: { text: "Unknown", code: "unknown" },
-  1000: { text: "Clear, Sunny", code: "clear-day" },
+  1000: { text: "Clear", code: "clear-day" },
   1100: { text: "Mostly Clear", code: "clear-day" },
   1101: { text: "Partly Cloudy", code: "partly-cloudy-day" },
   1102: { text: "Mostly Cloudy", code: "cloudy" },
@@ -116,7 +116,7 @@ setGlobal("NightTimeNext3", nextTime3Date > dayOneSunset || nextTime3Date < dayO
 if (nowTime > dayOneSunrise && nowTime < dayOneSunset) {
   var dateSun = dayOneSunset;
 } else {
-  var dateSun = dayTwosunrise;
+  var dateSun = dayTwoSunrise;
 }
 var dateSunHours = dateSun.getHours();
 if(dateSunHours > 12) {
